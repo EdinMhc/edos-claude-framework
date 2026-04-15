@@ -179,7 +179,7 @@ After each significant unit of work (a new file created, a service method added,
 
 | Feature | Status | Started | Completed |
 |---|---|---|---|
-| Billing Migration | PLANNING | 2026-04-14 | — |
+| _(none yet)_ | — | — | — |
 
 ---
 
