@@ -5,12 +5,32 @@
 This workflow system exists so that Claude can restore full project context instantly at the start of any session, without re-scanning the codebase. It also gives the user a clear view of what is being built, what has been finished, and why decisions were made.
 
 **How it works:**
-- Every feature gets its own file in `features/[Name].md`
-- `ACTIVE.md` always points to the feature currently being worked on — Claude reads this first at every session start
+- Projects live in `Workflow/projects/[ProjectName]/` — each project has its own `ACTIVE.md` and `features/` folder
+- At session start Claude lists available projects and lets the user choose which one to load, or create a new one
+- Every feature gets its own file in `projects/[ProjectName]/features/[Name].md`
+- `projects/[ProjectName]/ACTIVE.md` always points to the feature currently being worked on for that project
 - This file (`EdosFramework.md`) is the single source of truth — a fresh Claude instance reading only this file should be able to operate the entire system immediately
 - Keywords trigger specific actions (see Section B)
 
+**Folder structure:**
+```
+Workflow/
+├── EdosFramework.md
+├── edos-claude-framework/     ← git repo, synced via /update-repos
+└── projects/
+    ├── JoyRide/
+    │   ├── ACTIVE.md
+    │   └── features/
+    ├── FightGame/
+    │   ├── ACTIVE.md
+    │   └── features/
+    └── [NewProject]/          ← created automatically when user picks a new name
+        ├── ACTIVE.md
+        └── features/
+```
+
 **Why it improves efficiency:**
+- Multiple projects tracked independently — switching projects is just choosing a different folder
 - Claude reads `Files Modified` in the feature file and goes directly to those files — no broad codebase scanning
 - `Session Notes` survive context compaction — Claude knows exactly where the last session left off
 - `Decisions Made` prevents re-litigating the same architectural questions across sessions
@@ -22,9 +42,9 @@ This workflow system exists so that Claude can restore full project context inst
 
 | Keyword | Who triggers it | What Claude does |
 |---|---|---|
-| `"I want to start a new feature and it will be called [NAME]"` | User | Creates `features/[NAME].md` from the template, populates Requirements from your description, updates `ACTIVE.md` and the Feature Index below |
+| `"I want to start a new feature and it will be called [NAME]"` | User | Creates `projects/[Project]/features/[NAME].md` from the template, populates Requirements from your description, updates the project's `ACTIVE.md` and the Feature Index below |
 | `"CHECKPOINT"` | User or Claude proactively suggests it | Updates Session Notes and Files Modified (WIP) in the active feature file without marking it done. Confirms what was saved. |
-| `"WRAP UP [NAME]"` | User (when testing is done and you're satisfied) | Marks feature DONE: fills Files Modified fully with descriptions, writes Summary and Decisions Made, updates `ACTIVE.md` to "none", updates the Feature Index |
+| `"WRAP UP [NAME]"` | User (when testing is done and you're satisfied) | Marks feature DONE: fills Files Modified fully with descriptions, writes Summary and Decisions Made, updates project's `ACTIVE.md` to "none", updates the Feature Index |
 
 **Claude will also proactively ask:** *"Should we do a CHECKPOINT now?"* after meaningful blocks of work, until the user confirms they know the keywords well enough — then Claude tapers off.
 
@@ -97,15 +117,28 @@ This section contains the exact prompts Claude gives itself at each stage of the
 
 ---
 
-### On session start — no active feature
+### On session start — project selection
 
 ```
-1. Read ACTIVE.md.
-2. If ACTIVE FEATURE is "none", greet the user and ask what to work on next.
-3. If ACTIVE FEATURE points to a feature, read that feature file fully before doing anything else.
-4. Note: Status, Requirements (what's pending), Session Notes (latest entry), Decisions Made.
-5. Do NOT scan the codebase until you understand the current feature state from the file.
-6. Confirm with the user: "I've loaded context for [feature]. Last session: [last session note]. Ready to continue?"
+1. Scan Workflow/projects/ for subdirectories. Each subdirectory is a project.
+2. If no projects exist → skip to step 5.
+3. If one or more projects exist → present the list:
+     "Which project are you working on today?
+      1. JoyRide
+      2. FightGame
+      [N]. Something else — I'll create it"
+4. Wait for the user to pick a number or type a new name.
+   - Existing project chosen → set PROJECT = that folder name, continue to step 6.
+   - New name given → create Workflow/projects/[Name]/ with ACTIVE.md ("ACTIVE FEATURE: none") and features/ folder.
+     Set PROJECT = new name, skip to step 7.
+5. (No projects exist) → ask: "What project are you working on?" Create the folder, set PROJECT.
+6. Read Workflow/projects/[PROJECT]/ACTIVE.md.
+   - If ACTIVE FEATURE is "none" → go to step 7.
+   - If ACTIVE FEATURE points to a feature → read that feature file fully.
+     Note: Status, Requirements (pending), Session Notes (latest), Decisions Made.
+     Do NOT scan the codebase until you understand the current feature state.
+     Confirm: "Loaded [PROJECT] → [feature]. Last session: [last note]. Ready to continue?"
+7. (No active feature) Greet: "Loaded [PROJECT]. No active feature — what are we building?"
 ```
 
 ---
@@ -113,7 +146,7 @@ This section contains the exact prompts Claude gives itself at each stage of the
 ### On session start — resuming an IN_PROGRESS feature
 
 ```
-1. Read the feature file in full.
+1. Read the feature file in full from projects/[PROJECT]/features/[NAME].md.
 2. Identify which Requirements are pending (not yet implemented).
 3. Read the Files Modified section — open those files directly to re-establish code context.
    Do NOT read files outside of this list unless a new requirement demands it.
@@ -126,11 +159,11 @@ This section contains the exact prompts Claude gives itself at each stage of the
 ### On new feature start
 
 ```
-1. Create features/[NAME].md from the template in Section D.
+1. Create projects/[PROJECT]/features/[NAME].md from the template in Section D.
 2. Populate Requirements from the user's description. Ask clarifying questions
    about scope, edge cases, and acceptance criteria before writing any code.
-3. Update ACTIVE.md with the feature name, file path, status IN_PROGRESS, and start date.
-4. Add the feature to the Feature Index table in EdosFramework.md (Section F).
+3. Update projects/[PROJECT]/ACTIVE.md with the feature name, file path, status IN_PROGRESS, and start date.
+4. Add the feature to the Feature Index table in EdosFramework.md (Section F) under the correct project.
 5. Write the first Session Notes entry: "[date]: Feature created. Requirements confirmed with user."
 6. Confirm: "Feature [NAME] created. Here are the requirements I've recorded: [list]. Shall we start?"
 ```
@@ -183,7 +216,7 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 2. Write the Summary section: 3–5 sentences covering what was built, why it exists, and how it's used.
 3. Complete Decisions Made with any remaining architectural notes.
 4. Mark Status as DONE. Fill in Completed date.
-5. Update ACTIVE.md: set ACTIVE FEATURE to "none".
+5. Update projects/[PROJECT]/ACTIVE.md: set ACTIVE FEATURE to "none".
 6. Update the Feature Index in Section F: set status to DONE and fill Completed date.
 7. Confirm: "Feature [NAME] wrapped up. Summary: [one sentence]. [N] files modified."
 8. Always prompt for git — no exceptions:
@@ -200,9 +233,19 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 
 ## F. Feature Index
 
+Features are grouped by project. Claude adds rows here when a feature is created and marks them DONE at WRAP UP.
+
+### JoyRide
+
 | Feature | Status | Started | Completed |
 |---|---|---|---|
-| _(none yet)_ | — | — | — |
+| Billing Migration | IN_PROGRESS | 2026-04-19 | — |
+
+### FightGame
+
+| Feature | Status | Started | Completed |
+|---|---|---|---|
+| CodeQualityFixes + Buff/Debuff System | DONE | 2026-04-20 | 2026-04-21 |
 
 ---
 
@@ -211,7 +254,7 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 - **Read `Files Modified` first when resuming** — it's the fastest path to code context. Go directly to those files. Skip broad codebase scanning.
 - **`Session Notes` survive context compaction** — they're the continuity layer between sessions. Always append, never overwrite.
 - **`Decisions Made` saves architecture re-discovery** — the hardest thing to re-derive is *why* something was done a certain way. One line at the time of decision is worth 30 minutes of re-reading code later.
-- **`ACTIVE.md` is always the entry point** — Claude reads it first, every session. Keep it accurate.
+- **`projects/[PROJECT]/ACTIVE.md` is always the entry point** — after the user picks a project, Claude reads this first. Keep it accurate.
 - **This file is the system** — a fresh Claude instance reading only `EdosFramework.md` should be able to operate the entire workflow immediately, on any machine.
 
 ---
