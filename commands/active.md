@@ -1,21 +1,64 @@
 Load context for the currently active feature in Edo's Framework.
 
-Follow these steps exactly:
+Follow these steps exactly.
 
-1. Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/ACTIVE.md`.
-   - If the status is "none" or the file says there is no active feature, respond: "No active feature. Ask me to start a new one with: I want to start a new feature and it will be called [NAME]." Then stop.
+---
 
-2. Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/EdosFramework.md` to load the workflow rules and keyword triggers.
+## Step 1 — Determine which project to load
 
-3. Read the active feature file at `C:/Users/Ednmh/OneDrive/Desktop/Workflow/features/[ACTIVE FEATURE NAME].md`.
+Check if a project has already been established in this conversation (e.g. the user said "load JoyRide" or a previous skill already set context). If yes, skip to Step 2 with that project name.
 
-4. Read every file listed in the **Files Modified** table of the feature file so you have full context on the current code state. Do not scan the broader codebase — only read the listed files.
+If no project is known yet, scan for available projects:
 
-5. Respond with exactly this format:
-   ---
-   **Active feature:** [Feature Name]
-   **Status:** [Status]
-   **Last session:** [last bullet from Session Notes]
-   **Next step:** [first pending task based on requirements and session notes]
-   ---
-   Ready to continue. What would you like to do?
+```bash
+ls "C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/"
+```
+
+If the folder is empty or doesn't exist:
+> "No projects found. Start one with `/new-feature [name]`."
+Stop.
+
+If one or more projects exist, list them and ask:
+> "Which project would you like to load?
+> [numbered list of project folders]"
+
+Wait for the user to pick one. Store as PROJECT_NAME.
+
+---
+
+## Step 2 — Read the project's ACTIVE.md
+
+Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/ACTIVE.md`.
+
+If the file says `ACTIVE FEATURE: none` or is missing:
+> "No active feature for **[PROJECT_NAME]**. Start one with `/new-feature [name]`."
+Stop.
+
+---
+
+## Step 3 — Read the feature file
+
+Read the feature file at:
+`C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/features/[FEATURE FILE].md`
+
+---
+
+## Step 4 — Read modified files
+
+Read every file listed in the **Files Modified** table of the feature file so you have full context on the current code state. Do not scan the broader codebase — only read the listed files.
+
+---
+
+## Step 5 — Report
+
+Respond with exactly this format:
+```
+---
+**Project:** [PROJECT_NAME]
+**Active feature:** [Feature Name]
+**Status:** [Status]
+**Last session:** [last bullet from Session Notes]
+**Next step:** [first pending task based on requirements and session notes]
+---
+Ready to continue. What would you like to do?
+```

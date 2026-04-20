@@ -1,19 +1,17 @@
 Sync and push all changes to the edos-claude-framework GitHub repo.
 
-This skill keeps the repo in sync with the local working files:
-- `C:/Users/Ednmh/OneDrive/Desktop/Workflow/EdosFramework.md` → repo
-- `C:/Users/Ednmh/.claude/commands/*.md` → repo `commands/`
+The repo at `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework` IS the working directory.
+`EdosFramework.md`, `projects/`, and `commands/` are edited directly inside it — no separate source files to copy.
 
 Follow these steps exactly.
 
 ---
 
-## Step 1 — Sync local files into the repo
+## Step 1 — Sync commands from .claude
+
+Only the commands need to be copied in (they live in `.claude/commands/`, not in the repo):
 
 ```bash
-cp "C:/Users/Ednmh/OneDrive/Desktop/Workflow/EdosFramework.md" \
-   "C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/EdosFramework.md"
-
 cp "C:/Users/Ednmh/.claude/commands/"*.md \
    "C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/commands/"
 ```
@@ -32,13 +30,14 @@ And stop here.
 
 Build a commit message from the actual diff. Check which files changed:
 - If only `EdosFramework.md` changed → "Update EdosFramework.md"
+- If only `projects/` changed → "Update projects: [list changed project names]"
 - If only skill files changed → "Update commands: [list the changed files without path or extension, comma-separated]"
-- If both changed → "Update EdosFramework.md and commands: [list]"
+- If multiple areas changed → combine: "Update EdosFramework.md, projects: [...], commands: [...]"
 - Add a one-line body describing what was added/changed if it's obvious from the diff
 
 ```bash
 cd "C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework" && \
-git add EdosFramework.md commands/ && \
+git add EdosFramework.md commands/ projects/ && \
 git commit -m "$(cat <<'EOF'
 [COMMIT MESSAGE HERE]
 
