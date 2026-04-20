@@ -1,0 +1,6 @@
+# User project tracking — local only, never committed
+projects/
+
+# Legacy flat-structure files (pre-multi-project)
+ACTIVE.md
+features/
