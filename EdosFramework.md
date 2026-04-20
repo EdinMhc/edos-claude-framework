@@ -145,6 +145,21 @@ After each significant unit of work (a new file created, a service method added,
 - Update Files Modified with any newly touched files (mark WIP if partially done).
 - Proactively ask: "Should we do a CHECKPOINT now?" once a meaningful block is complete.
   Continue asking this until the user confirms they have the keywords memorized — then taper off to once per session.
+
+Git commit prompting — apply these thresholds, not after every tiny change:
+- 5+ files modified → suggest a commit after the current logical block finishes.
+- Any single file change that is architecturally significant (new interface, new migration, new service wired into DI) → suggest a commit.
+- A full phase or sub-feature completes (e.g. "Phase 2 done", "debuff system done") → always prompt for a commit.
+
+Prompt format when threshold is hit:
+  "That's a meaningful chunk — want to commit before we continue?
+   Suggested message: '[verb] [what]: [one-line summary]'"
+
+If the user has not yet created a feature branch and the Files Modified count reaches 5+, also ask:
+  "You're on [current branch] with [N] files changed. Want to move this to a feature branch first?
+   Suggested name: feature/[short-kebab-description]"
+
+Do not repeat the branch question once the user has answered it (yes or no) for this feature.
 ```
 
 ---
@@ -171,6 +186,14 @@ After each significant unit of work (a new file created, a service method added,
 5. Update ACTIVE.md: set ACTIVE FEATURE to "none".
 6. Update the Feature Index in Section F: set status to DONE and fill Completed date.
 7. Confirm: "Feature [NAME] wrapped up. Summary: [one sentence]. [N] files modified."
+8. Always prompt for git — no exceptions:
+   a. Check current branch with `git branch --show-current`.
+   b. Check what's uncommitted with `git status --short`.
+   c. If there are uncommitted changes:
+      - If on main/master: "You're on [branch] with uncommitted changes. Want me to create a feature branch and commit, or commit directly to [branch]?"
+      - If on a feature branch: "Want me to commit everything and push to [branch]?"
+   d. If nothing uncommitted: "All changes already committed. Want me to push?"
+   e. Wait for answer — then execute immediately with a suggested commit message covering the full feature.
 ```
 
 ---
