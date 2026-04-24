@@ -20,12 +20,15 @@ Workflow/
 └── projects/
     ├── [ProjectA]/
     │   ├── ACTIVE.md
+    │   ├── About.md            ← optional, local only, never committed
     │   └── features/
     ├── [ProjectB]/
     │   ├── ACTIVE.md
+    │   ├── About.md
     │   └── features/
     └── [NewProject]/          ← created automatically when user picks a new name
         ├── ACTIVE.md
+        ├── About.md            ← created by /context (optional)
         └── features/
 ```
 
@@ -43,8 +46,10 @@ Workflow/
 | Keyword | Who triggers it | What Claude does |
 |---|---|---|
 | `"I want to start a new feature and it will be called [NAME]"` | User | Creates `projects/[Project]/features/[NAME].md` from the template, populates Requirements from your description, updates the project's `ACTIVE.md` and the Feature Index below |
-| `"CHECKPOINT"` | User or Claude proactively suggests it | Updates Session Notes and Files Modified (WIP) in the active feature file without marking it done. Confirms what was saved. |
+| `"CHECKPOINT"` | User or Claude proactively suggests it | Updates Session Notes and Files Modified (WIP) in the active feature file without marking it done. Also updates About.md if it exists. Confirms what was saved. |
 | `"WRAP UP [NAME]"` | User (when testing is done and you're satisfied) | Marks feature DONE: fills Files Modified fully with descriptions, writes Summary and Decisions Made, updates project's `ACTIVE.md` to "none", updates the Feature Index |
+| `/context` | User (before starting any feature or project) | Deep questioning mode — Claude extracts full real-world understanding of what is being built and why, confirms understanding with the user, saves context to the feature file and optionally to About.md |
+| `/analyze` | User (after /context or when starting implementation) | High-effort codebase scan + requirements review → produces a phased implementation plan with reasoning. Implements phase by phase on confirmation. |
 
 **Claude will also proactively ask:** *"Should we do a CHECKPOINT now?"* after meaningful blocks of work, until the user confirms they know the keywords well enough — then Claude tapers off.
 
@@ -111,7 +116,33 @@ When a new feature starts, Claude creates `features/[Name].md` using this exact 
 
 ---
 
-## E. Self-Prompts for Claude
+## E. The About File
+
+Each project can optionally have an `About.md` file at `projects/[ProjectName]/About.md`. This is a living knowledge base — not a feature spec, not code documentation, but Claude's understanding of the project as a real-world thing.
+
+**What it contains:**
+- What the project is and what problem it solves
+- Who uses it, in what context, and why
+- How it works in real life — narrative walkthroughs, not bullet lists
+- How features connect to each other and to the core purpose
+- Key design decisions and the real-world reason behind them
+
+**How it grows:**
+- Created by `/context` — Claude gathers real-world understanding and writes it here
+- Updated by `/checkpoint` — as features progress, new context gets woven in
+- The more features are built with `/context`, the more complete the picture becomes
+
+**Critical properties:**
+- `projects/` is in `.gitignore` — **About.md is never committed, never pushed, never visible to anyone but the local user**
+- It is strictly local machine memory
+- It is never a substitute for the feature files — it complements them by holding the "why" that feature files don't capture
+
+**How Claude uses it:**
+At the start of any session, if About.md exists Claude should read it alongside the active feature file. It provides the real-world frame that makes every implementation decision better — understanding *why* a feature exists changes how you build it.
+
+---
+
+## F. Self-Prompts for Claude
 
 This section contains the exact prompts Claude gives itself at each stage of the workflow. A fresh Claude instance reading this file should follow these instructions immediately.
 
@@ -133,6 +164,8 @@ This section contains the exact prompts Claude gives itself at each stage of the
      Set PROJECT = new name, skip to step 7.
 5. (No projects exist) → ask: "What project are you working on?" Create the folder, set PROJECT.
 6. Read Workflow/projects/[PROJECT]/ACTIVE.md.
+   - If About.md exists at Workflow/projects/[PROJECT]/About.md → read it silently first.
+     This gives real-world context that frames everything that follows. Do not summarise it to the user unprompted — just let it inform your understanding.
    - If ACTIVE FEATURE is "none" → go to step 7.
    - If ACTIVE FEATURE points to a feature → read that feature file fully.
      Note: Status, Requirements (pending), Session Notes (latest), Decisions Made.
@@ -146,12 +179,14 @@ This section contains the exact prompts Claude gives itself at each stage of the
 ### On session start — resuming an IN_PROGRESS feature
 
 ```
-1. Read the feature file in full from projects/[PROJECT]/features/[NAME].md.
-2. Identify which Requirements are pending (not yet implemented).
-3. Read the Files Modified section — open those files directly to re-establish code context.
+1. If About.md exists at projects/[PROJECT]/About.md → read it first, silently.
+   Use it to understand the real-world context behind the feature before reading the code.
+2. Read the feature file in full from projects/[PROJECT]/features/[NAME].md.
+3. Identify which Requirements are pending (not yet implemented).
+4. Read the Files Modified section — open those files directly to re-establish code context.
    Do NOT read files outside of this list unless a new requirement demands it.
-4. Summarize status to the user in 2–3 lines: what's done, what's pending.
-5. Ask: "Ready to continue from where we left off?"
+5. Summarize status to the user in 2–3 lines: what's done, what's pending.
+6. Ask: "Ready to continue from where we left off?"
 ```
 
 ---
@@ -394,10 +429,15 @@ Push at minimum: at the end of every working session. Ideally: whenever you comm
 ### The full feature lifecycle with Git
 
 ```
+/context                      ← Step 0 (recommended): deep questioning → understand the why
+                                 Creates/updates About.md with real-world project knowledge
 /branch feature/[name]       ← Step 1: create isolated workspace
   → work, write code
 /commit                       ← Step 2: save logical snapshots (repeat)
 /push                         ← Step 3: back up + share
+
+  Optional before coding:
+/analyze                      ← Deep codebase scan → phased plan → implement step by step
 
   Path A — team workflow (recommended):
   → Open PR, tag reviewer     ← Step 4: request code review
@@ -416,6 +456,8 @@ Push at minimum: at the end of every working session. Ideally: whenever you comm
 
 | Keyword / Skill | What Claude does |
 |---|---|
+| `/context` | Deep questioning mode — builds real-world understanding of a feature or project before any code is written |
+| `/analyze` | High-effort requirements + codebase analysis → phased implementation plan |
 | `/branch [name]` | Switch to base branch, pull latest, create new branch, explain why |
 | `/commit` | Inspect changes, write meaningful commit message, explain what's being saved |
 | `/push` | Push branch, prompt for PR creation, tag EdinMhc |
