@@ -18,10 +18,10 @@ Workflow/
 ├── EdosFramework.md
 ├── edos-claude-framework/     ← git repo, synced via /update-repos
 └── projects/
-    ├── JoyRide/
+    ├── [ProjectA]/
     │   ├── ACTIVE.md
     │   └── features/
-    ├── FightGame/
+    ├── [ProjectB]/
     │   ├── ACTIVE.md
     │   └── features/
     └── [NewProject]/          ← created automatically when user picks a new name
@@ -124,8 +124,8 @@ This section contains the exact prompts Claude gives itself at each stage of the
 2. If no projects exist → skip to step 5.
 3. If one or more projects exist → present the list:
      "Which project are you working on today?
-      1. JoyRide
-      2. FightGame
+      1. [ProjectA]
+      2. [ProjectB]
       [N]. Something else — I'll create it"
 4. Wait for the user to pick a number or type a new name.
    - Existing project chosen → set PROJECT = that folder name, continue to step 6.
@@ -235,17 +235,11 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 
 Features are grouped by project. Claude adds rows here when a feature is created and marks them DONE at WRAP UP.
 
-### JoyRide
+### [ProjectName]
 
 | Feature | Status | Started | Completed |
 |---|---|---|---|
-| Billing Migration | IN_PROGRESS | 2026-04-19 | — |
-
-### FightGame
-
-| Feature | Status | Started | Completed |
-|---|---|---|---|
-| CodeQualityFixes + Buff/Debuff System | DONE | 2026-04-20 | 2026-04-21 |
+| Example Feature | DONE | YYYY-MM-DD | YYYY-MM-DD |
 
 ---
 
@@ -404,11 +398,18 @@ Push at minimum: at the end of every working session. Ideally: whenever you comm
   → work, write code
 /commit                       ← Step 2: save logical snapshots (repeat)
 /push                         ← Step 3: back up + share
-  → Open PR, tag EdinMhc      ← Step 4: request code review
+
+  Path A — team workflow (recommended):
+  → Open PR, tag reviewer     ← Step 4: request code review
   → Address review feedback   ← Step 5: fix and re-push
   → PR merged into main       ← Step 6: feature is officially shipped
-/wrap-up [name]               ← Step 7: close framework record
-/send-report                  ← Step 8: notify collaborators (if BE changes)
+
+  Path B — solo / full access:
+/merge                        ← Step 4: merge directly into main/develop
+                                 (skips review — only when you own the repo)
+
+/wrap-up [name]               ← Final: close framework record
+/send-report                  ← Final: notify collaborators (if BE changes)
 ```
 
 ### Git keyword triggers
@@ -418,6 +419,7 @@ Push at minimum: at the end of every working session. Ideally: whenever you comm
 | `/branch [name]` | Switch to base branch, pull latest, create new branch, explain why |
 | `/commit` | Inspect changes, write meaningful commit message, explain what's being saved |
 | `/push` | Push branch, prompt for PR creation, tag EdinMhc |
+| `/merge` | Merge feature branch directly into main/develop — explains every step, handles conflicts |
 | `/git` | Full Git education — branches, commits, pushes, PRs, merges |
 
 ---
@@ -463,7 +465,7 @@ This explanation happens before the key is generated, so the user understands wh
 
 ## J. About This System
 
-Edo's Framework was designed collaboratively between Edo and Claude on 2026-04-14, originally for the JoyRide TMS project. It has since evolved into a beginner-friendly development framework that combines persistent Claude context with real-world Git workflow education.
+Edo's Framework was designed collaboratively between Edo and Claude on 2026-04-14. It has since evolved into a beginner-friendly development framework that combines persistent Claude context with real-world Git workflow education.
 
 **What prompted it:** Context compaction mid-feature and the need to re-scan the codebase at each new session were causing wasted time. The framework fixes both by giving Claude a structured, file-based memory that persists across sessions and survives context limits.
 
