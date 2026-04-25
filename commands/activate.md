@@ -1234,9 +1234,9 @@ Make it muscle memory. Open chat → `/active` → start working.
 
 | Command | When to use it |
 |---|---|
-| `/context` | Use this first, before anything else, for any new feature or project. Claude will ask you questions — like a real kickoff meeting — until it fully understands what you're building, why it exists, and how it works in real life. The better Claude understands the *why*, the better every decision it makes will be. |
-| `/analyze` | After `/context` (or when you already have requirements), use this to turn understanding into a concrete plan. Claude does a deep scan of your codebase, reasons through the implementation, and produces a phased plan. You approve it, then it builds one phase at a time. |
-| `/new-feature [name]` | Creates the tracking file for a new feature — the document that becomes Claude's memory for this specific piece of work. Run this alongside or just after `/context`. |
+| `/gather-context` | Use this first, before anything else, for any new feature or project. Claude will ask you questions — like a real kickoff meeting — until it fully understands what you're building, why it exists, and how it works in real life. The better Claude understands the *why*, the better every decision it makes will be. |
+| `/analyze` | After `/gather-context` (or when you already have requirements), use this to turn understanding into a concrete plan. Claude does a deep scan of your codebase, reasons through the implementation, and produces a phased plan. You approve it, then it builds one phase at a time. |
+| `/new-feature [name]` | Creates the tracking file for a new feature — the document that becomes Claude's memory for this specific piece of work. Run this alongside or just after `/gather-context`. |
 | `/branch [name]` | Creates a new Git branch for your feature. Always do this before writing code — it keeps your feature isolated from the main codebase until it's ready. |
 
 ### While You're Building
@@ -1272,7 +1272,7 @@ Here's the full lifecycle of a feature, from idea to shipped:
 ```
 NEW FEATURE
     │
-    ├─ /context          ← understand the why before writing anything
+    ├─ /gather-context   ← understand the why before writing anything
     ├─ /new-feature      ← create the tracking file
     ├─ /branch           ← create isolated workspace in Git
     │
@@ -1301,7 +1301,7 @@ SHIPPING
 
 **1. Start every session with `/active`.** Not sometimes — always. Ten seconds of typing saves ten minutes of re-explaining context. This single habit is what separates a smooth session from a frustrating one.
 
-**2. Use `/context` before starting any feature.** It feels slower at first. It isn't. The questions Claude asks surface ambiguity before it becomes a bug or a rebuild. The clearer Claude understands what you're building and why, the fewer wrong turns you'll take.
+**2. Use `/gather-context` before starting any feature.** It feels slower at first. It isn't. The questions Claude asks surface ambiguity before it becomes a bug or a rebuild. The clearer Claude understands what you're building and why, the fewer wrong turns you'll take.
 
 **3. Don't skip checkpoints.** Claude will remind you, but the underlying reason matters: context compaction is real. Long sessions can cause Claude to lose track of earlier details. Checkpoints preserve the record outside of the chat — so even if the conversation compresses, the facts are saved.
 
@@ -1309,7 +1309,7 @@ SHIPPING
 
 **5. Let Claude explain what it's doing.** Every Git operation in this framework comes with an explanation. Read them. Over time you'll build a real mental model of how code moves from your laptop to production — and that knowledge will make you a better developer, not just someone who runs commands.
 
-**6. The About file is your project's long-term memory.** If you use `/context` for every feature, the About file gradually becomes a complete picture of your project — what it is, how it works in real life, how features connect. The more complete it is, the better Claude performs at the start of every session.
+**6. The About file is your project's long-term memory.** If you use `/gather-context` for every feature, the About file gradually becomes a complete picture of your project — what it is, how it works in real life, how features connect. The more complete it is, the better Claude performs at the start of every session.
 
 ---
 

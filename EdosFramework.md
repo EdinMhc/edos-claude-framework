@@ -48,7 +48,7 @@ Workflow/
 | `"I want to start a new feature and it will be called [NAME]"` | User | Creates `projects/[Project]/features/[NAME].md` from the template, populates Requirements from your description, updates the project's `ACTIVE.md` and the Feature Index below |
 | `"CHECKPOINT"` | User or Claude proactively suggests it | Updates Session Notes and Files Modified (WIP) in the active feature file without marking it done. Also updates About.md if it exists. Confirms what was saved. |
 | `"WRAP UP [NAME]"` | User (when testing is done and you're satisfied) | Marks feature DONE: fills Files Modified fully with descriptions, writes Summary and Decisions Made, updates project's `ACTIVE.md` to "none", updates the Feature Index |
-| `/context` | User (before starting any feature or project) | Deep questioning mode — Claude extracts full real-world understanding of what is being built and why, confirms understanding with the user, saves context to the feature file and optionally to About.md |
+| `/gather-context` | User (before starting any feature or project) | Deep questioning mode — Claude extracts full real-world understanding of what is being built and why, confirms understanding with the user, saves context to the feature file and optionally to About.md |
 | `/analyze` | User (after /context or when starting implementation) | High-effort codebase scan + requirements review → produces a phased implementation plan with reasoning. Implements phase by phase on confirmation. |
 
 **Claude will also proactively ask:** *"Should we do a CHECKPOINT now?"* after meaningful blocks of work, until the user confirms they know the keywords well enough — then Claude tapers off.
@@ -128,9 +128,9 @@ Each project can optionally have an `About.md` file at `projects/[ProjectName]/A
 - Key design decisions and the real-world reason behind them
 
 **How it grows:**
-- Created by `/context` — Claude gathers real-world understanding and writes it here
+- Created by `/gather-context` — Claude gathers real-world understanding and writes it here
 - Updated by `/checkpoint` — as features progress, new context gets woven in
-- The more features are built with `/context`, the more complete the picture becomes
+- The more features are built with `/gather-context`, the more complete the picture becomes
 
 **Critical properties:**
 - `projects/` is in `.gitignore` — **About.md is never committed, never pushed, never visible to anyone but the local user**
@@ -429,7 +429,7 @@ Push at minimum: at the end of every working session. Ideally: whenever you comm
 ### The full feature lifecycle with Git
 
 ```
-/context                      ← Step 0 (recommended): deep questioning → understand the why
+/gather-context                      ← Step 0 (recommended): deep questioning → understand the why
                                  Creates/updates About.md with real-world project knowledge
 /branch feature/[name]       ← Step 1: create isolated workspace
   → work, write code
@@ -456,7 +456,7 @@ Push at minimum: at the end of every working session. Ideally: whenever you comm
 
 | Keyword / Skill | What Claude does |
 |---|---|
-| `/context` | Deep questioning mode — builds real-world understanding of a feature or project before any code is written |
+| `/gather-context` | Deep questioning mode — builds real-world understanding of a feature or project before any code is written |
 | `/analyze` | High-effort requirements + codebase analysis → phased implementation plan |
 | `/branch [name]` | Switch to base branch, pull latest, create new branch, explain why |
 | `/commit` | Inspect changes, write meaningful commit message, explain what's being saved |
