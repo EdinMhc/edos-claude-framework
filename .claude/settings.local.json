@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(mv \"C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/commands/context.md\" \"C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/commands/gather-context.md\")",
-      "Bash(mv __TRACKED_VAR__/.claude/commands/context.md __TRACKED_VAR__/.claude/commands/gather-context.md)"
+      "Bash(mv __TRACKED_VAR__/.claude/commands/context.md __TRACKED_VAR__/.claude/commands/gather-context.md)",
+      "PowerShell(python --version)",
+      "PowerShell(& \"C:\\\\Users\\\\Ednmh\\\\AppData\\\\Local\\\\Microsoft\\\\WindowsApps\\\\python.exe\" --version 2>&1)"
     ]
   }
 }

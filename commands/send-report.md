@@ -10,25 +10,63 @@ cat "$HOME/.claude/send-report-config.json" 2>/dev/null
 ```
 
 If the file does NOT exist or is empty, this is first-time setup. Tell the user:
-> "First-time setup for /send-report. I need three things to configure this:"
+> "First-time setup for /send-report. I need two things to configure this:"
 
 Then ask these one at a time and wait for each answer:
 1. **Sender Gmail address** — the Gmail you'll send reports FROM (e.g. you@gmail.com)
 2. **Gmail App Password** — go to myaccount.google.com → Security → 2-Step Verification → App Passwords → create one named "Claude Reports". It looks like: `xxxx xxxx xxxx xxxx`
-3. **Recipient email** — who receives these reports
 
-Once you have all three, write them to `~/.claude/send-report-config.json`:
+Once you have both, write them to `~/.claude/send-report-config.json`:
 ```json
 {
   "from": "<sender email>",
-  "appPassword": "<app password>",
-  "to": "<recipient email>"
+  "appPassword": "<app password>"
 }
 ```
 
-Confirm: "Config saved. You won't be asked again on this device."
+Confirm: "Sender config saved. You won't be asked again on this device."
 
 If the file DOES exist, read it silently and continue.
+
+---
+
+## Step 1b — Check / create contacts
+
+Check if `~/.claude/contacts.json` exists:
+```bash
+cat "$HOME/.claude/contacts.json" 2>/dev/null
+```
+
+**If the file does NOT exist or is empty:**
+
+Tell the user:
+> "I'll also need to know who to send reports to. I'll save your contacts locally so you never have to type an email address again."
+
+Ask:
+> "What's the email address of the first person you send reports to?"
+
+Wait for their answer. Then try to extract a name from the email string (e.g. `john.doe@company.com` → "John Doe", `sarahk@example.com` → "Sarahk"). Show the user what you extracted and ask:
+> "I'll save them as **[extracted name]** — does that look right, or would you like a different name for this contact?"
+
+Wait for their answer. Use whichever name they confirm.
+
+Then ask:
+> "Is there anyone else you regularly send reports to? If so, give me their email and I'll add them now. If not, just say no."
+
+Repeat the name extraction + confirmation for each additional person they give. Keep asking until they say no or they're done.
+
+Once all contacts are collected, write them to `~/.claude/contacts.json`:
+```json
+[
+  { "name": "John Doe", "email": "john.doe@company.com" },
+  { "name": "Sarah", "email": "sarah@example.com" }
+]
+```
+
+Tell the user:
+> "Contacts saved. You can always add more people later — just tell me when sending a report."
+
+**If the file DOES exist:** Read it silently. The contacts list is now available for this session.
 
 ---
 
@@ -93,7 +131,23 @@ Using everything you gathered, write a developer-focused report email:
 
 ---
 
-## Step 5 — Show draft and ask for confirmation
+## Step 5 — Pick recipients and show draft
+
+**Select recipients:**
+
+Read the contacts from `~/.claude/contacts.json`. If there is only one contact, use them automatically. If there are multiple, show the list and ask:
+> "Who should this report go to? (You can pick more than one)"
+
+List contacts by name, e.g.:
+> 1. John Doe
+> 2. Sarah K
+> 3. Everyone
+
+Wait for their answer. Resolve the selection to one or more email addresses.
+
+If the user names someone not in the contacts list, ask for their email, offer to save them as a new contact, and if yes append them to `~/.claude/contacts.json`.
+
+**Show the draft:**
 
 Display the full draft to the user exactly like this:
 
@@ -101,7 +155,7 @@ Display the full draft to the user exactly like this:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  DRAFT REPORT EMAIL
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- TO:      <recipient>
+ TO:      <Name (email), Name (email), ...>
  FROM:    <sender>
  SUBJECT: <subject>
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -121,7 +175,9 @@ If the user wants changes: apply them, show the updated draft again, ask again. 
 
 Read the config from `~/.claude/send-report-config.json`.
 
-Write this script to `$HOME/.claude/send-report-tmp.js`, substituting the actual values for FROM, APP_PASSWORD, TO, SUBJECT, and BODY (escape backticks and `$` in the body):
+The TO field is a comma-separated string of all selected recipient email addresses.
+
+Write this script to `$HOME/.claude/send-report-tmp.js`, substituting the actual values for FROM, APP_PASSWORD, TO (comma-separated emails), SUBJECT, and BODY (escape backticks and `$` in the body):
 
 ```js
 const nodemailer = require('nodemailer');
@@ -154,7 +210,7 @@ Then delete it:
 rm "$HOME/.claude/send-report-tmp.js"
 ```
 
-If output is `SUCCESS`: tell the user "Report sent to <recipient>."
+If output is `SUCCESS`: tell the user "Report sent to [list recipient names]."
 If output contains `ERROR`: show the error message and suggest checking the App Password or Gmail settings.
 
 ---
