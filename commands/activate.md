@@ -1207,100 +1207,161 @@ Wait for their answer.
 
 ## TUTORIAL TRACK 1 — First-time users
 
-Deliver this tutorial conversationally, section by section. Don't dump it all at once — pause between sections and let it breathe.
+Deliver this tutorial conversationally, in sections. Wait after each concept before continuing — let the user ask questions if they have them. Never dump everything at once.
 
 ---
 
-### The problem this framework solves
+### Part 1 — Three things you need to understand first
 
-Normally, Claude forgets everything the moment you close a chat. Every new conversation starts completely blank — no memory of what you built, what decisions were made, or where you left off. That's a serious problem when you're building something over days or weeks.
+Before any commands, explain these three concepts. A user who understands these will never be confused by the framework. A user who skips them will be lost immediately.
 
-**Edo's Framework fixes this.** It gives Claude a structured, file-based memory that lives on your machine. Every project you work on gets a tracking folder. Every feature you work on gets its own file with your requirements, which files were changed, every decision made, and running session notes. When you come back tomorrow — or in three weeks — Claude reads those files and picks up exactly where you left off.
-
-Here's what a typical day looks like using this framework. Follow these steps in order.
+Deliver them one at a time, conversationally:
 
 ---
 
-### Step 1 — Register your project with `/project`
+**Concept 1 — Claude's memory problem (and why this framework exists)**
 
-Before anything else, your project needs to exist in the framework. This is a one-time step per project.
+Say:
+> "Before we do anything, I want to explain one thing about how Claude works — because once you understand it, everything else will make sense.
+>
+> Every time you close a chat with Claude and open a new one, Claude forgets everything. Completely. It has no memory of what you built, what we decided, or where you left off. It's like starting fresh with someone who has never met you.
+>
+> That's a real problem when you're building something over days or weeks. You'd have to re-explain your whole project every single time.
+>
+> **Edo's Framework solves this.** It creates a set of notes on your computer that Claude reads at the start of every session. Instead of forgetting everything, Claude reads those notes and picks up exactly where you left off — knowing what you're building, what's done, and what's next.
+>
+> Think of it like leaving a detailed note on your assistant's desk every evening. When they arrive in the morning, they read the note and know exactly what to do. That's what this framework does for Claude."
 
-Run:
-```
-/project MyProjectName
-```
-
-Or if you already know what you want to build:
-```
-/project MyProjectName - A task tracker for remote teams
-```
-
-**What this does:** Creates a folder for your project inside the framework's `projects/` directory, with an `ACTIVE.md` file (which tracks what you're currently working on) and a `features/` folder (which will hold one file per feature as you build them).
-
-If you have an **existing project** you just want to start tracking — same command. It doesn't scaffold anything new, it just registers the project so the framework knows about it.
+Pause. Ask if this makes sense before continuing.
 
 ---
 
-### Step 2 — Define what you're working on with `/new-feature`
+**Concept 2 — What is a project?**
 
-Once your project exists, tell the framework what specific piece of work you're about to start.
+Say:
+> "The framework organises your work around **projects**. A project is simply one app or thing you're building.
+>
+> For example: if you're building a gym tracker, that's one project. If you're also building a personal website, that's a second project. They're completely separate — different notes, different history, different memory.
+>
+> Most people start with just one project. You can always add more later.
+>
+> You register a project with one command: `/project [name]`. That's it. Claude creates a tracking folder for it and starts remembering things under that name."
 
-Run:
-```
-/new-feature Login and Registration
-```
-
-**What this does:** Creates a feature file at `projects/[YourProject]/features/Login-and-Registration.md` and updates `ACTIVE.md` to point to it. The feature file is where Claude stores everything — the requirements, which files it touches, every decision made, and notes from each session. This is the core memory unit.
-
-You can also give a description when you run it, or Claude will ask you clarifying questions to fill in the requirements properly before starting.
-
----
-
-### Step 3 — Start every chat with `/active`
-
-This is the single most important habit in the entire framework. Every time you open a fresh Claude chat to work on your project, type `/active` first — before anything else.
-
-**What it does:** Reads your active feature file, loads the session notes, and tells Claude exactly what you were working on, what's been done, and what's next. Without it, Claude is starting cold with no context. With it, Claude walks in fully briefed.
-
-**Smart detection:** If you open Claude inside your project's folder, `/active` will detect which project you're in and load that project's context automatically — no need to specify. If you have multiple projects, it'll ask which one you mean.
-
-Think of it like this: you're working with a developer who has perfect memory — but only if you hand them the notes. `/active` is handing them the notes.
-
-**The rule: open chat → `/active` → start working. Always.**
+Pause. Ask if this makes sense.
 
 ---
 
-### Step 4 — Work, save progress, ship
+**Concept 3 — What is a feature?**
 
-Once you're in a session with context loaded, you just build. Claude knows what you're working on, what the requirements are, and what's been done. As you go:
+Say:
+> "Inside a project, you work on one thing at a time. That thing is called a **feature**.
+>
+> A feature is just a specific piece of work — something like 'Add a login page', 'Build the product search', or 'Fix the checkout bug'. It doesn't have to be big or small — it just has to be one clear thing.
+>
+> Why does this matter? Because Claude's notes are organised by feature. When you start working on something, you give it a name and Claude creates a notes file for it. Every session you have on that feature gets added to that file — what you built, what decisions were made, what's still to do.
+>
+> When you come back tomorrow and run `/active`, Claude reads that file and says: 'I remember exactly where we were. Here's what's done and here's what's next.'
+>
+> You start a feature with: `/new-feature [name]`. Example: `/new-feature Login Page`."
 
-- **`/checkpoint`** — after any meaningful block of work. Claude updates the feature file with what was done and which files were touched. This is your safety net against losing context mid-session.
-- **`/commit`** — after finishing a logical unit of work. Claude inspects your changes, writes a meaningful commit message, and explains what's being saved. Not after every line — after something meaningful is complete.
-- **`/branch`** — before writing code on a new feature. Keeps your work isolated from the main codebase until it's ready.
-- **`/push`** — backs your code up to GitHub. A commit that only lives on your machine is one power cut away from being gone.
-- **`/merge`** — when you're ready to bring your feature into main.
-- **`/wrap-up [name]`** — when the feature is fully done and tested. Marks it DONE in the framework and clears the active feature.
-
----
-
-### Step 5 — Notify your teammates with `/send-report`
-
-If you're working with other developers — especially if you changed the backend API — run this after wrapping a feature:
-
-```
-/send-report
-```
-
-**What it does:** Drafts and sends a structured email to your collaborators describing what changed: which endpoints were added or modified, what the new request/response shapes are, and anything they need to update on their side. It uses your saved contacts so you never have to type email addresses.
-
-This is how you keep the team in sync when you're the one touching the backend.
+Pause. Ask if this makes sense before continuing.
 
 ---
 
-After delivering this, ask:
-> "That's the core workflow — five steps that cover everything you'll do day to day. Want me to walk you through the rest of the commands too? There are a few more that make the workflow more efficient, like `/gather-context` for planning features before building them, `/analyze` for turning requirements into a phased implementation plan, and `/git` if you want to understand what Git is actually doing under the hood."
+### Part 2 — Your everyday workflow
 
-Wait for their answer. If yes, deliver **TUTORIAL TRACK 2** below.
+Now that the concepts are clear, walk through the day-to-day flow. Keep it simple.
+
+Say:
+> "Alright — those three concepts are really all you need to know to use this framework well. Now let me show you exactly what a typical day looks like."
+
+---
+
+**Day 1 (one time only) — Set up your project**
+
+> "The very first time, you register your project. You only do this once per project — not every day.
+>
+> Type: `/project [YourProjectName]`
+>
+> If you have an existing codebase you want to start working on, same command — it doesn't change your code, it just tells the framework the project exists."
+
+---
+
+**Starting a piece of work — Create a feature**
+
+> "When you want to start working on something specific, you create a feature for it.
+>
+> Type: `/new-feature Login Page`
+>
+> Claude will ask you a couple of questions about what you want to build — just answer in plain language. No technical knowledge needed. Claude figures out the details.
+>
+> This only needs to happen once per piece of work, not every session."
+
+---
+
+**⭐ Every single day — Start with `/active`**
+
+> "This is the one habit that makes everything work. Every time you open a new chat with Claude to work on your project, type `/active` first — before anything else.
+>
+> Claude will read the notes for your current feature and tell you exactly where you left off. It takes about 5 seconds and means you never have to re-explain your project again.
+>
+> Open chat → type `/active` → start working. Every time. No exceptions."
+
+---
+
+**While working — Save your progress**
+
+> "As you build things, two commands keep your progress safe:
+>
+> - **`/checkpoint`** — saves what Claude has done this session to the notes file. Run this after any meaningful block of work. It's like hitting save in a video game.
+>
+> - **`/commit`** — saves your actual code changes. Think of it like a snapshot of your code at a specific point in time. If something breaks later, you can always go back. Claude handles the details — you just type `/commit` and it explains what it's saving.
+>
+> Don't worry about doing these perfectly. Claude will remind you when it makes sense to do them."
+
+---
+
+**Backing up your code — Push to GitHub**
+
+> "When you commit, your code is saved on your machine. But it only exists there. If your computer breaks or gets lost, that code is gone.
+>
+> `/push` backs your code up online to GitHub — a safe, permanent copy in the cloud. Think of it like emailing yourself a backup.
+>
+> Claude will ask if you want to push after committing. Just say yes."
+
+---
+
+**When something is done — Wrap up**
+
+> "When you've finished a feature and tested it, close it out:
+>
+> `/wrap-up [feature name]`
+>
+> Claude will write a summary of what was built, mark it as complete, and clear the active feature so you can start the next one."
+
+---
+
+**If you work with others — Send a report**
+
+> "If someone else is working on the same project and you changed something they depend on, run:
+>
+> `/send-report`
+>
+> Claude will draft and send them an email explaining what changed. You don't need to write it yourself."
+
+---
+
+After walking through the workflow, say:
+> "That's genuinely everything you need to know to get started. Six things: register your project, create a feature, type `/active` every day, checkpoint and commit your work, push to back up, wrap up when done.
+>
+> The most important one by far is `/active` at the start of every chat. If you do nothing else consistently, do that.
+>
+> Do you have any questions before we start? And do you want me to explain what Git and GitHub actually are — or are you happy to just use the commands for now?"
+
+Wait for their answer. If they want to understand Git, run `/git`. If they're happy to just use the commands, move on.
+
+Then ask:
+> "Want me to show you the full list of commands available? Just type `/help` any time — it prints a one-page reference you can come back to whenever you need it."
 
 ---
 
