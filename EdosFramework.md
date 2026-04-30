@@ -45,9 +45,9 @@ Workflow/
 
 | Keyword | Who triggers it | What Claude does |
 |---|---|---|
-| `"I want to start a new feature and it will be called [NAME]"` | User | Creates `projects/[Project]/features/[NAME].md` from the template, populates Requirements from your description, updates the project's `ACTIVE.md` and the Feature Index below |
+| `"I want to start a new feature and it will be called [NAME]"` | User | Creates `projects/[Project]/features/[NAME].md` from the template, populates Requirements from your description, updates the project's `ACTIVE.md` |
 | `"CHECKPOINT"` | User or Claude proactively suggests it | Updates Session Notes and Files Modified (WIP) in the active feature file without marking it done. Also updates About.md if it exists. Confirms what was saved. |
-| `"WRAP UP [NAME]"` | User (when testing is done and you're satisfied) | Marks feature DONE: fills Files Modified fully with descriptions, writes Summary and Decisions Made, updates project's `ACTIVE.md` to "none", updates the Feature Index |
+| `"WRAP UP [NAME]"` | User (when testing is done and you're satisfied) | Marks feature DONE: fills Files Modified fully with descriptions, writes Summary and Decisions Made, updates project's `ACTIVE.md` to "none" |
 | `/gather-context` | User (before starting any feature or project) | Deep questioning mode — Claude extracts full real-world understanding of what is being built and why, confirms understanding with the user, saves context to the feature file and optionally to About.md |
 | `/analyze` | User (after /context or when starting implementation) | High-effort codebase scan + requirements review → produces a phased implementation plan with reasoning. Implements phase by phase on confirmation. |
 
@@ -151,7 +151,7 @@ This section contains the exact prompts Claude gives itself at each stage of the
 ### On session start — project selection
 
 ```
-1. Scan Workflow/projects/ for subdirectories. Each subdirectory is a project.
+1. Detect the framework root (search common locations for the `edos-claude-framework` folder). Scan `FRAMEWORK_ROOT/projects/` for subdirectories. Each subdirectory is a project.
 2. If no projects exist → skip to step 5.
 3. If one or more projects exist → present the list:
      "Which project are you working on today?
@@ -266,15 +266,11 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 
 ---
 
-## F. Feature Index
+## F. Feature Tracking
 
-Features are grouped by project. Claude adds rows here when a feature is created and marks them DONE at WRAP UP.
+Features are tracked locally — not in this file. Each project has its own `features/` folder at `projects/[ProjectName]/features/`. Every feature is a separate markdown file there. The folder itself is the index — no separate list is maintained in this file.
 
-### [ProjectName]
-
-| Feature | Status | Started | Completed |
-|---|---|---|---|
-| Example Feature | DONE | YYYY-MM-DD | YYYY-MM-DD |
+This keeps project and feature names off the public repository entirely.
 
 ---
 

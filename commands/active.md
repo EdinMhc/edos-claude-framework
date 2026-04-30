@@ -8,10 +8,21 @@ Follow these steps exactly.
 
 Check if a project has already been established in this conversation (e.g. the user said "load JoyRide" or a previous skill already set context). If yes, skip to Step 2 with that project name.
 
-If no project is known yet, first try to detect the project automatically:
-
+If no project is known yet, first detect the framework root:
 ```bash
-ls "C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/"
+for candidate in \
+    "$USERPROFILE/OneDrive/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/OneDrive/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/Workflow/edos-claude-framework"; do
+    [ -d "$candidate/projects" ] && echo "$candidate" && break
+done
+```
+Store as FRAMEWORK_ROOT. Set PROJECTS_PATH = FRAMEWORK_ROOT/projects
+
+Then list available projects:
+```bash
+ls "PROJECTS_PATH/"
 ```
 
 If the folder is empty or doesn't exist:
@@ -32,20 +43,20 @@ Wait for the user to pick one. Store as PROJECT_NAME.
 
 ## Step 2 — Read the project's ACTIVE.md
 
-Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/ACTIVE.md`.
+Read `PROJECTS_PATH/[PROJECT_NAME]/ACTIVE.md`.
 
 If the file says `ACTIVE FEATURE: none` or is missing:
 > "No active feature for **[PROJECT_NAME]**. Start one with `/new-feature [name]`."
 Stop.
 
-If About.md exists at `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/About.md`, read it silently before continuing. Use it to understand the real-world context behind the project. Do not summarise it to the user unprompted — just let it inform your understanding.
+If About.md exists at `PROJECTS_PATH/[PROJECT_NAME]/About.md`, read it silently before continuing. Use it to understand the real-world context behind the project. Do not summarise it to the user unprompted — just let it inform your understanding.
 
 ---
 
 ## Step 3 — Read the feature file
 
 Read the feature file at:
-`C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/features/[FEATURE FILE].md`
+`PROJECTS_PATH/[PROJECT_NAME]/features/[FEATURE FILE].md`
 
 ---
 

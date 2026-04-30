@@ -1,20 +1,128 @@
 Start a new feature in Edo's Framework. The feature name is: $ARGUMENTS
 
-Follow these steps exactly:
+Follow these steps exactly.
 
-1. Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/ACTIVE.md` to confirm no other feature is currently active. If one is active, warn the user and stop — do not overwrite it.
+---
 
-2. Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/EdosFramework.md` to load the feature file template (Section D).
+## Step 1 — Detect framework root
 
-3. Ask the user clarifying questions about scope, edge cases, and acceptance criteria before writing any code or creating any files. Wait for their answers.
-
-4. Create `C:/Users/Ednmh/OneDrive/Desktop/Workflow/features/$ARGUMENTS.md` using the exact template from Section D of EdosFramework.md. Populate the Requirements section from the user's description and their answers to your clarifying questions. Set Status to IN_PROGRESS and Started to today's date. Write the first Session Notes entry: "[today's date]: Feature created. Requirements confirmed with user."
-
-5. Update `C:/Users/Ednmh/OneDrive/Desktop/Workflow/ACTIVE.md` to:
+Run:
+```bash
+for candidate in \
+    "$USERPROFILE/OneDrive/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/OneDrive/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/Workflow/edos-claude-framework"; do
+    [ -d "$candidate/projects" ] && echo "$candidate" && break
+done
 ```
-ACTIVE FEATURE: $ARGUMENTS
+
+Store the result as FRAMEWORK_ROOT. If nothing is returned:
+> "Could not locate Edo's Framework. Make sure it's installed in your Workflow folder and try again."
+Stop.
+
+Set PROJECTS_PATH = FRAMEWORK_ROOT/projects
+
+---
+
+## Step 2 — Determine which project to add the feature to
+
+Check if a project is already established in this conversation. If yes, use it as PROJECT_NAME and skip to Step 3.
+
+Scan available projects:
+```bash
+ls "PROJECTS_PATH/"
 ```
 
-6. Update the Feature Index table in `C:/Users/Ednmh/OneDrive/Desktop/Workflow/EdosFramework.md` (Section F) — add a new row with the feature name, status IN_PROGRESS, started date, and "—" for completed.
+If no projects exist:
+> "No projects found. Create one first with `/project [name]`."
+Stop.
 
-7. Confirm to the user: "Feature [$ARGUMENTS] created. Here are the requirements I've recorded: [list them]. Shall we start?"
+If only one project exists, use it automatically and proceed.
+
+If multiple projects exist, ask:
+> "Which project is this feature for?
+> [numbered list]"
+
+Wait for the user to pick one. Store as PROJECT_NAME.
+
+---
+
+## Step 3 — Check nothing is currently active
+
+Read `PROJECTS_PATH/[PROJECT_NAME]/ACTIVE.md`.
+
+If ACTIVE FEATURE is anything other than "none", warn the user:
+> "**[PROJECT_NAME]** already has an active feature: **[current feature]**. You should wrap that one up before starting a new one — or let me know if you want to switch anyway."
+
+Wait for their answer. If they want to proceed, continue. Otherwise stop.
+
+---
+
+## Step 4 — Ask clarifying questions
+
+Before creating any files, ask 2–3 focused clarifying questions about scope, edge cases, and acceptance criteria. Wait for their answers before proceeding.
+
+---
+
+## Step 5 — Create the feature file
+
+Create `PROJECTS_PATH/[PROJECT_NAME]/features/[ARGUMENTS].md` using this exact template:
+
+```markdown
+# Feature: [Name]
+**Status:** IN_PROGRESS
+**Started:** [today's date]
+**Completed:** —
+
+---
+
+## Requirements
+[Populated from user's description and answers to clarifying questions]
+
+---
+
+## Files Modified
+
+| File | What changed |
+|---|---|
+
+---
+
+## Decisions Made
+
+---
+
+## Session Notes
+- [today's date]: Feature created. Requirements confirmed with user.
+
+---
+
+## Test Checklist
+
+---
+
+## Summary
+—
+```
+
+---
+
+## Step 6 — Update ACTIVE.md
+
+Write to `PROJECTS_PATH/[PROJECT_NAME]/ACTIVE.md`:
+```
+ACTIVE FEATURE: [ARGUMENTS]
+```
+
+---
+
+## Step 7 — Confirm
+
+Tell the user:
+> "Feature **[ARGUMENTS]** created for project **[PROJECT_NAME]**.
+>
+> Here are the requirements I've recorded:
+> [list them]
+>
+> Shall we start?"

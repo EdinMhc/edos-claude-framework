@@ -25,14 +25,25 @@ Wait for confirmation. If no, stop.
 
 Check if a project and feature are already loaded in this conversation. If yes, skip to Step 3.
 
-If not, scan for available projects:
-
+If not, first detect the framework root:
 ```bash
-ls "C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/" 2>&1
+for candidate in \
+    "$USERPROFILE/OneDrive/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/OneDrive/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/Workflow/edos-claude-framework"; do
+    [ -d "$candidate/projects" ] && echo "$candidate" && break
+done
+```
+Store as FRAMEWORK_ROOT. Set PROJECTS_PATH = FRAMEWORK_ROOT/projects
+
+Scan for available projects:
+```bash
+ls "PROJECTS_PATH/" 2>&1
 ```
 
 If no projects exist:
-> "No projects found in the framework yet. Start a project first with `/new-feature [name]`, then run `/analyze`."
+> "No projects found in the framework yet. Start a project first with `/project [name]`, then run `/analyze`."
 Stop.
 
 If one or more projects exist, ask:
@@ -41,7 +52,7 @@ If one or more projects exist, ask:
 
 Wait for the user to pick one. Store as PROJECT_NAME.
 
-Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/ACTIVE.md`.
+Read `PROJECTS_PATH/[PROJECT_NAME]/ACTIVE.md`.
 
 If ACTIVE FEATURE is set, read that feature file fully and store the requirements. If ACTIVE FEATURE is "none", ask:
 > "No active feature found for **[PROJECT_NAME]**. What feature do you want to analyze? Describe what you want to build and I'll work from that."

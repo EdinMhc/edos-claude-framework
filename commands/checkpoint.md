@@ -8,9 +8,21 @@ Follow these steps exactly.
 
 Check if a project and active feature are already known in this conversation. If yes, skip to Step 2.
 
-If not, scan for available projects:
+If not, first detect the framework root:
 ```bash
-ls "C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/" 2>&1
+for candidate in \
+    "$USERPROFILE/OneDrive/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/OneDrive/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/Desktop/Workflow/edos-claude-framework" \
+    "$HOME/Workflow/edos-claude-framework"; do
+    [ -d "$candidate/projects" ] && echo "$candidate" && break
+done
+```
+Store as FRAMEWORK_ROOT. Set PROJECTS_PATH = FRAMEWORK_ROOT/projects
+
+Then scan for available projects:
+```bash
+ls "PROJECTS_PATH/" 2>&1
 ```
 
 If no projects exist, tell the user:
@@ -22,14 +34,14 @@ If projects exist and only one is present, use it automatically. If multiple exi
 
 Wait for their answer. Store as PROJECT_NAME.
 
-Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/ACTIVE.md`.
+Read `PROJECTS_PATH/[PROJECT_NAME]/ACTIVE.md`.
 
 If ACTIVE FEATURE is "none" or the file is missing:
 > "No active feature for **[PROJECT_NAME]** — nothing to checkpoint."
 Stop.
 
 Store the active feature name as FEATURE_NAME and the feature file path as:
-`C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/features/[FEATURE_NAME].md`
+`PROJECTS_PATH/[PROJECT_NAME]/features/[FEATURE_NAME].md`
 
 ---
 
@@ -52,7 +64,7 @@ Write the updated file back.
 
 ## Step 3 — Update the About file (if it exists)
 
-Check if `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/About.md` exists.
+Check if `PROJECTS_PATH/[PROJECT_NAME]/About.md` exists.
 
 If it does:
 - Read it in full
