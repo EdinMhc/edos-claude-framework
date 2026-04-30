@@ -1184,11 +1184,8 @@ For **existing projects**, print a shorter summary:
   Use /new-feature [name] to start tracking your first piece of work.
 ```
 
-Then deliver the full framework tutorial below. Take your time with this — it is one of the most important things the user will read. Deliver it clearly, in sections, conversationally.
+Then print this header and ask which tutorial track to follow:
 
----
-
-Print this header:
 ```
 ╔══════════════════════════════════════════════════════════════════╗
 ║                                                                  ║
@@ -1198,127 +1195,185 @@ Print this header:
 ╚══════════════════════════════════════════════════════════════════╝
 ```
 
-Then deliver the following tutorial word for word, filling in placeholders:
+Ask:
+> "Before I walk you through how this works — have you used Edo's Framework before, or is this your first time?
+>
+> 1. **First time** — walk me through everything
+> 2. **I know the basics** — just show me the commands and how they connect"
+
+Wait for their answer.
 
 ---
 
-**You're all set up. Before we start building, let me walk you through how this framework works and how to get the most out of it.**
+## TUTORIAL TRACK 1 — First-time users
+
+Deliver this tutorial conversationally, section by section. Don't dump it all at once — pause between sections and let it breathe.
 
 ---
 
-## How Claude Works Under This Framework
+### The problem this framework solves
 
-Normally, Claude forgets everything the moment you close a chat. Every new conversation is a blank slate — no memory of what you built, what decisions were made, or where you left off. That's a problem when you're building something real over days or weeks.
+Normally, Claude forgets everything the moment you close a chat. Every new conversation starts completely blank — no memory of what you built, what decisions were made, or where you left off. That's a serious problem when you're building something over days or weeks.
 
-**Edo's Framework solves this.** It gives Claude a structured file-based memory that lives on your machine. Every feature you work on gets its own tracking file with your requirements, every file touched, every decision made, and session-by-session notes. When you come back tomorrow — or in three weeks — Claude reads those files and picks up exactly where you left off.
+**Edo's Framework fixes this.** It gives Claude a structured, file-based memory that lives on your machine. Every project you work on gets a tracking folder. Every feature you work on gets its own file with your requirements, which files were changed, every decision made, and running session notes. When you come back tomorrow — or in three weeks — Claude reads those files and picks up exactly where you left off.
 
-**The one thing you need to remember:** Claude doesn't load this context automatically. At the start of every new chat, you need to tell it to. That's what `/active` is for.
+Here's what a typical day looks like using this framework. Follow these steps in order.
 
 ---
 
-## ⭐ The Command You'll Use Most: `/active`
+### Step 1 — Register your project with `/project`
+
+Before anything else, your project needs to exist in the framework. This is a one-time step per project.
+
+Run:
+```
+/project MyProjectName
+```
+
+Or if you already know what you want to build:
+```
+/project MyProjectName - A task tracker for remote teams
+```
+
+**What this does:** Creates a folder for your project inside the framework's `projects/` directory, with an `ACTIVE.md` file (which tracks what you're currently working on) and a `features/` folder (which will hold one file per feature as you build them).
+
+If you have an **existing project** you just want to start tracking — same command. It doesn't scaffold anything new, it just registers the project so the framework knows about it.
+
+---
+
+### Step 2 — Define what you're working on with `/new-feature`
+
+Once your project exists, tell the framework what specific piece of work you're about to start.
+
+Run:
+```
+/new-feature Login and Registration
+```
+
+**What this does:** Creates a feature file at `projects/[YourProject]/features/Login-and-Registration.md` and updates `ACTIVE.md` to point to it. The feature file is where Claude stores everything — the requirements, which files it touches, every decision made, and notes from each session. This is the core memory unit.
+
+You can also give a description when you run it, or Claude will ask you clarifying questions to fill in the requirements properly before starting.
+
+---
+
+### Step 3 — Start every chat with `/active`
 
 This is the single most important habit in the entire framework. Every time you open a fresh Claude chat to work on your project, type `/active` first — before anything else.
 
-What it does: reads your active feature file, loads your session notes, and tells Claude exactly what you were working on, what's done, and what's next. Without it, Claude is starting cold with no context. With it, Claude walks in fully briefed.
+**What it does:** Reads your active feature file, loads the session notes, and tells Claude exactly what you were working on, what's been done, and what's next. Without it, Claude is starting cold with no context. With it, Claude walks in fully briefed.
 
-**Think of it like this:** imagine you're working with a developer who has perfect memory — but only if you hand them the notes. `/active` is handing them the notes.
+**Smart detection:** If you open Claude inside your project's folder, `/active` will detect which project you're in and load that project's context automatically — no need to specify. If you have multiple projects, it'll ask which one you mean.
 
-Make it muscle memory. Open chat → `/active` → start working.
+Think of it like this: you're working with a developer who has perfect memory — but only if you hand them the notes. `/active` is handing them the notes.
 
----
-
-## The Full Toolkit — What Each Command Does and When to Use It
-
-### Before You Write Any Code
-
-| Command | When to use it |
-|---|---|
-| `/gather-context` | Use this first, before anything else, for any new feature or project. Claude will ask you questions — like a real kickoff meeting — until it fully understands what you're building, why it exists, and how it works in real life. The better Claude understands the *why*, the better every decision it makes will be. |
-| `/analyze` | After `/gather-context` (or when you already have requirements), use this to turn understanding into a concrete plan. Claude does a deep scan of your codebase, reasons through the implementation, and produces a phased plan. You approve it, then it builds one phase at a time. |
-| `/new-feature [name]` | Creates the tracking file for a new feature — the document that becomes Claude's memory for this specific piece of work. Run this alongside or just after `/gather-context`. |
-| `/branch [name]` | Creates a new Git branch for your feature. Always do this before writing code — it keeps your feature isolated from the main codebase until it's ready. |
-
-### While You're Building
-
-| Command | When to use it |
-|---|---|
-| `/active` | Every new chat session, before anything else. Loads your current feature context so Claude isn't starting blind. |
-| `/checkpoint` | After any meaningful chunk of work. Claude updates the feature file with what was done, which files were touched, and any decisions made. Also updates your About file if you have one. Claude will remind you, but the habit is yours to build. |
-| `/commit` | After finishing a logical unit of work — not after every line, not only at the end of the day. Claude inspects what changed, writes a meaningful commit message, and explains what's being saved. |
-
-### When You're Done
-
-| Command | When to use it |
-|---|---|
-| `/push` | After committing, to back up your code to GitHub. Also the starting point for opening a Pull Request when you want someone to review your changes before merging. |
-| `/merge` | When you're ready to bring your feature branch into main yourself — skipping the review process. Use this when it's your own repo and you don't need a reviewer. Claude explains every step and handles conflicts. |
-| `/wrap-up [name]` | When the feature is fully tested and done. Claude fills in the complete feature record, marks it as DONE, and clears the active feature. Always do this — it keeps your project history clean. |
-| `/send-report` | After wrapping a backend feature that other developers depend on. Notifies collaborators of what the API contract changed. |
-
-### For Learning and Help
-
-| Command | When to use it |
-|---|---|
-| `/git` | Any time you want to understand Git better — what branches really are, how commits work, what a Pull Request does, how merging works. Run this once and you'll understand the fundamentals that most beginners skip. |
-| `/connect-db` | Once your database is running, use this to give Claude direct query access. It can then create test data, inspect tables, and debug data issues without you writing queries manually. |
+**The rule: open chat → `/active` → start working. Always.**
 
 ---
 
-## How It All Connects — The Complete Workflow
+### Step 4 — Work, save progress, ship
 
-Here's the full lifecycle of a feature, from idea to shipped:
+Once you're in a session with context loaded, you just build. Claude knows what you're working on, what the requirements are, and what's been done. As you go:
+
+- **`/checkpoint`** — after any meaningful block of work. Claude updates the feature file with what was done and which files were touched. This is your safety net against losing context mid-session.
+- **`/commit`** — after finishing a logical unit of work. Claude inspects your changes, writes a meaningful commit message, and explains what's being saved. Not after every line — after something meaningful is complete.
+- **`/branch`** — before writing code on a new feature. Keeps your work isolated from the main codebase until it's ready.
+- **`/push`** — backs your code up to GitHub. A commit that only lives on your machine is one power cut away from being gone.
+- **`/merge`** — when you're ready to bring your feature into main.
+- **`/wrap-up [name]`** — when the feature is fully done and tested. Marks it DONE in the framework and clears the active feature.
+
+---
+
+### Step 5 — Notify your teammates with `/send-report`
+
+If you're working with other developers — especially if you changed the backend API — run this after wrapping a feature:
 
 ```
-NEW FEATURE
-    │
-    ├─ /gather-context   ← understand the why before writing anything
-    ├─ /new-feature      ← create the tracking file
-    ├─ /branch           ← create isolated workspace in Git
-    │
-BUILDING
-    │
-    ├─ /active           ← every new chat, load context first (always)
-    ├─ write code
-    ├─ /checkpoint       ← save progress after meaningful chunks
-    ├─ /commit           ← snapshot logical units of work
-    │   (repeat)
-    │
-SHIPPING
-    │
-    ├─ /push             ← back up to GitHub
-    │
-    ├─ Path A (team):    open Pull Request → reviewer approves → merged
-    ├─ Path B (solo):    /merge → merge directly into main
-    │
-    ├─ /wrap-up          ← close the feature record
-    └─ /send-report      ← notify collaborators (if backend changed)
+/send-report
+```
+
+**What it does:** Drafts and sends a structured email to your collaborators describing what changed: which endpoints were added or modified, what the new request/response shapes are, and anything they need to update on their side. It uses your saved contacts so you never have to type email addresses.
+
+This is how you keep the team in sync when you're the one touching the backend.
+
+---
+
+After delivering this, ask:
+> "That's the core workflow — five steps that cover everything you'll do day to day. Want me to walk you through the rest of the commands too? There are a few more that make the workflow more efficient, like `/gather-context` for planning features before building them, `/analyze` for turning requirements into a phased implementation plan, and `/git` if you want to understand what Git is actually doing under the hood."
+
+Wait for their answer. If yes, deliver **TUTORIAL TRACK 2** below.
+
+---
+
+## TUTORIAL TRACK 2 — Experienced users / full command reference
+
+Print:
+```
+  ──────────────────────────────────────────────────────────────────
+  COMMAND REFERENCE — How everything fits together
+  ──────────────────────────────────────────────────────────────────
+```
+
+Deliver this as a clean reference. No hand-holding — just what each command does and when it matters.
+
+---
+
+**THE EVERYDAY LOOP**
+
+```
+New project?    → /project [Name]
+New feature?    → /new-feature [Name]
+Every session   → /active               (always first, every chat)
+While building  → /checkpoint           (save progress)
+                → /commit               (snapshot logical units)
+                → /push                 (back up to GitHub)
+Done?           → /wrap-up [Name]       (close the feature record)
+Teammates?      → /send-report          (notify of BE contract changes)
 ```
 
 ---
 
-## Tips for Getting the Most Out of This Framework
+**BEFORE YOU WRITE CODE**
 
-**1. Start every session with `/active`.** Not sometimes — always. Ten seconds of typing saves ten minutes of re-explaining context. This single habit is what separates a smooth session from a frustrating one.
-
-**2. Use `/gather-context` before starting any feature.** It feels slower at first. It isn't. The questions Claude asks surface ambiguity before it becomes a bug or a rebuild. The clearer Claude understands what you're building and why, the fewer wrong turns you'll take.
-
-**3. Don't skip checkpoints.** Claude will remind you, but the underlying reason matters: context compaction is real. Long sessions can cause Claude to lose track of earlier details. Checkpoints preserve the record outside of the chat — so even if the conversation compresses, the facts are saved.
-
-**4. Commit often, push regularly.** A commit that only exists on your machine is one power cut away from being lost. `/push` is your safety net.
-
-**5. Let Claude explain what it's doing.** Every Git operation in this framework comes with an explanation. Read them. Over time you'll build a real mental model of how code moves from your laptop to production — and that knowledge will make you a better developer, not just someone who runs commands.
-
-**6. The About file is your project's long-term memory.** If you use `/gather-context` for every feature, the About file gradually becomes a complete picture of your project — what it is, how it works in real life, how features connect. The more complete it is, the better Claude performs at the start of every session.
+| Command | What it does |
+|---|---|
+| `/project [Name]` | Registers a project in the framework — creates the tracking folder, ACTIVE.md, and features/ directory. Works for new projects and existing codebases you want to start tracking. |
+| `/gather-context` | Deep questioning mode. Claude extracts the real-world understanding of a feature before any code is written — what it is, who uses it, why it exists, what failure looks like. Feeds the feature file and About.md. |
+| `/analyze` | Scans the codebase + reviews requirements → produces a phased implementation plan. You approve it, then Claude builds phase by phase. |
+| `/new-feature [Name]` | Creates the feature tracking file and points ACTIVE.md at it. This is Claude's memory unit for the feature. |
+| `/branch [Name]` | Creates a feature branch from a clean, up-to-date base. Explains what branching is and why it matters. |
 
 ---
 
-## One Last Thing
+**WHILE BUILDING**
 
-This framework is designed for real-world development. That means the workflows here — branches, commits, pull requests, code review — aren't invented just for learning. They are how professional teams ship software every day. The habits you build here transfer directly to any job, any team, any codebase.
-
-You're not just building a project. You're learning how to work like a developer.
+| Command | What it does |
+|---|---|
+| `/active` | Loads the active project and feature context. Smart: detects the current project from the folder Claude is opened in. Can load any project if you have multiple. |
+| `/checkpoint` | Appends session notes, updates Files Modified, records any decisions made. Survives context compaction — this is the continuity layer between sessions. |
+| `/commit` | Inspects changes, writes a meaningful commit message, explains what's being saved. |
 
 ---
 
-Ready. What would you like to build first?
+**SHIPPING AND CLOSING**
+
+| Command | What it does |
+|---|---|
+| `/push` | Pushes to GitHub, prompts for PR creation if on a feature branch. |
+| `/merge` | Merges feature branch into main/develop directly. Handles conflicts step by step. |
+| `/wrap-up [Name]` | Closes the feature record — fills Files Modified, writes Summary, marks DONE, clears ACTIVE.md. Always prompts for a final commit. |
+| `/send-report` | Sends a structured change report email to collaborators. Uses saved contacts — first run asks for setup. |
+
+---
+
+**UTILITIES**
+
+| Command | What it does |
+|---|---|
+| `/git` | Full Git education — branches, commits, pushes, PRs, merges. Run once to build a real mental model. |
+| `/connect-db` | Connects Claude to your SQL Server database for direct query access — test data, table inspection, debugging. |
+| `/update` | Pulls the latest version of Edo's Framework from GitHub. |
+
+---
+
+After delivering the reference, say:
+> "That's everything. The workflow is the same whether you're a beginner or experienced — the only difference is how much explaining Claude does along the way. Ready to build something?"

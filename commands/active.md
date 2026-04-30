@@ -8,17 +8,21 @@ Follow these steps exactly.
 
 Check if a project has already been established in this conversation (e.g. the user said "load JoyRide" or a previous skill already set context). If yes, skip to Step 2 with that project name.
 
-If no project is known yet, scan for available projects:
+If no project is known yet, first try to detect the project automatically:
 
 ```bash
 ls "C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/"
 ```
 
 If the folder is empty or doesn't exist:
-> "No projects found. Start one with `/new-feature [name]`."
+> "No projects found. Start one with `/project [name]`."
 Stop.
 
-If one or more projects exist, list them and ask:
+**Smart detection:** Check the current working directory Claude is opened in. Extract the folder name (e.g. if Claude is opened in `C:/Users/.../JoyRide`, the folder name is `JoyRide`). If a project folder with that exact name exists in the projects list, load it automatically without asking — just proceed silently to Step 2 with that project name.
+
+If no match is found between the current directory and the projects list, and there is only one project in the list, load it automatically.
+
+If no match is found and there are multiple projects, list them and ask:
 > "Which project would you like to load?
 > [numbered list of project folders]"
 
@@ -33,6 +37,8 @@ Read `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[P
 If the file says `ACTIVE FEATURE: none` or is missing:
 > "No active feature for **[PROJECT_NAME]**. Start one with `/new-feature [name]`."
 Stop.
+
+If About.md exists at `C:/Users/Ednmh/OneDrive/Desktop/Workflow/edos-claude-framework/projects/[PROJECT_NAME]/About.md`, read it silently before continuing. Use it to understand the real-world context behind the project. Do not summarise it to the user unprompted — just let it inform your understanding.
 
 ---
 
