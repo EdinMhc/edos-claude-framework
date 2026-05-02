@@ -1,0 +1,9 @@
+# User project tracking — local only, never committed
+projects/
+
+# Local Claude Code permission files — machine-specific, never committed
+.claude/
+
+# Legacy flat-structure files (pre-multi-project)
+ACTIVE.md
+features/
