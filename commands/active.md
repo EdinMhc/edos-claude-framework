@@ -51,6 +51,8 @@ Stop.
 
 If About.md exists at `PROJECTS_PATH/[PROJECT_NAME]/About.md`, read it silently before continuing. Use it to understand the real-world context behind the project. Do not summarise it to the user unprompted — just let it inform your understanding.
 
+If `Integrations.md` exists at `PROJECTS_PATH/[PROJECT_NAME]/Integrations.md`, read it silently as well. This file contains external service credentials and context (Gmail, Shopify, etc.) set up via `/add-integration`. Do not mention it to the user unless they ask about integrations or trigger an integration-related task — just let it inform what you're capable of doing for this project.
+
 ---
 
 ## Step 3 — Read the feature file
