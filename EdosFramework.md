@@ -21,14 +21,20 @@ Workflow/
     ├── [ProjectA]/
     │   ├── ACTIVE.md
     │   ├── About.md            ← optional, local only, never committed
+    │   ├── Agents.md           ← persistent agent registry, created at project init
+    │   ├── Integrations.md     ← persistent integration registry, created at project init
     │   └── features/
     ├── [ProjectB]/
     │   ├── ACTIVE.md
     │   ├── About.md
+    │   ├── Agents.md
+    │   ├── Integrations.md
     │   └── features/
     └── [NewProject]/          ← created automatically when user picks a new name
         ├── ACTIVE.md
         ├── About.md            ← created by /context (optional)
+        ├── Agents.md           ← initialized empty by the VS Code extension
+        ├── Integrations.md     ← initialized empty by the VS Code extension
         └── features/
 ```
 
@@ -142,7 +148,73 @@ At the start of any session, if About.md exists Claude should read it alongside 
 
 ---
 
-## F. Self-Prompts for Claude
+## F. Agents and Integrations
+
+Each project has two persistent registry files that survive framework reinstalls and persist across all sessions. These are created automatically when a project is first set up (by the VS Code extension or manually). Claude must read and write these files when creating agents or adding integrations — never rely on in-session memory alone.
+
+---
+
+### Agents.md
+
+**Location:** `projects/[PROJECT]/Agents.md`
+**Purpose:** Tracks every automation agent that has been set up for this project.
+
+**Format — each agent is a `##` section:**
+```markdown
+# Agents — [ProjectName]
+
+## [Agent Name]
+- Type: managed | external
+- Schedule: [e.g. daily 09:00 Sarajevo | manual]
+- Active: true | false
+- Platform: [only for external — e.g. GitHub Actions]
+- Description: [one line describing what the agent does]
+```
+
+**Claude's rules for Agents.md:**
+- When creating a new agent, append a new `## [Name]` section to this file
+- Do not overwrite existing entries — always append
+- `Active: true` means the agent is currently running; `Active: false` means it has been paused
+- The VS Code extension reads this file to display the agents list in the sidebar and toggle active/inactive state
+- If the file does not exist, create it with the header `# Agents — [ProjectName]` before appending
+
+---
+
+### Integrations.md
+
+**Location:** `projects/[PROJECT]/Integrations.md`
+**Purpose:** Tracks every external service connected to this project (Gmail, Shopify, Google Sheets, Stripe, etc.).
+
+**Format — each integration is a `##` section:**
+```markdown
+# Integrations — [ProjectName]
+
+## [Service Name]
+- Type: [e.g. email, payments, spreadsheet, CRM]
+- Status: connected | pending | paused
+- Credentials: [where stored — e.g. ~/.claude/send-report-config.json, .env, GitHub Secrets]
+- Description: [one line on what this integration does for the project]
+```
+
+**Claude's rules for Integrations.md:**
+- When adding an integration, append a new `## [Service Name]` section to this file
+- Do not overwrite existing entries — always append
+- The VS Code extension reads this file to display the integrations list in the sidebar
+- If the file does not exist, create it with the header `# Integrations — [ProjectName]` before appending
+
+---
+
+### Why these files matter
+
+Both files are stored inside the framework's `projects/[PROJECT]/` folder — not inside the code repository. This means:
+- They are **never committed to the code repo** and never visible to collaborators
+- They **survive VS Code extension reinstalls** — the extension reads from the framework folder, not from its own storage
+- They **survive framework reinstalls** as long as the `projects/` folder is preserved (or backed up via OneDrive)
+- A fresh Claude instance loading this file knows exactly where to find and update the agent and integration records for any project
+
+---
+
+## G. Self-Prompts for Claude
 
 This section contains the exact prompts Claude gives itself at each stage of the workflow. A fresh Claude instance reading this file should follow these instructions immediately.
 
@@ -266,7 +338,7 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 
 ---
 
-## F. Feature Tracking
+## H. Feature Tracking
 
 Features are tracked locally — not in this file. Each project has its own `features/` folder at `projects/[ProjectName]/features/`. Every feature is a separate markdown file there. The folder itself is the index — no separate list is maintained in this file.
 
