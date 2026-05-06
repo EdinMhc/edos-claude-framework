@@ -5,9 +5,9 @@
 This workflow system exists so that Claude can restore full project context instantly at the start of any session, without re-scanning the codebase. It also gives the user a clear view of what is being built, what has been finished, and why decisions were made.
 
 **How it works:**
-- Projects live in `Workflow/projects/[ProjectName]/` — each project has its own `ACTIVE.md` and `features/` folder
+- Projects live in `Workflow/projects/[ProjectName]/` — each project has its own `ACTIVE.md` and `chats/` folder
 - At session start Claude lists available projects and lets the user choose which one to load, or create a new one
-- Every feature gets its own file in `projects/[ProjectName]/features/[Name].md`
+- Every chat gets its own file in `projects/[ProjectName]/chats/[Name].md`
 - `projects/[ProjectName]/ACTIVE.md` always points to the feature currently being worked on for that project
 - This file (`EdosFramework.md`) is the single source of truth — a fresh Claude instance reading only this file should be able to operate the entire system immediately
 - Keywords trigger specific actions (see Section B)
@@ -23,19 +23,19 @@ Workflow/
     │   ├── About.md            ← optional, local only, never committed
     │   ├── Agents.md           ← persistent agent registry, created at project init
     │   ├── Integrations.md     ← persistent integration registry, created at project init
-    │   └── features/
+    │   └── chats/
     ├── [ProjectB]/
     │   ├── ACTIVE.md
     │   ├── About.md
     │   ├── Agents.md
     │   ├── Integrations.md
-    │   └── features/
+    │   └── chats/
     └── [NewProject]/          ← created automatically when user picks a new name
         ├── ACTIVE.md
         ├── About.md            ← created by /context (optional)
         ├── Agents.md           ← initialized empty by the VS Code extension
         ├── Integrations.md     ← initialized empty by the VS Code extension
-        └── features/
+        └── chats/
 ```
 
 **Why it improves efficiency:**
@@ -51,17 +51,17 @@ Workflow/
 
 | Keyword | Who triggers it | What Claude does |
 |---|---|---|
-| `"I want to start a new feature and it will be called [NAME]"` | User | Creates `projects/[Project]/features/[NAME].md` from the template, populates Requirements from your description, updates the project's `ACTIVE.md` |
-| `"CHECKPOINT"` | User or Claude proactively suggests it | Updates Session Notes and Files Modified (WIP) in the active feature file without marking it done. Also updates About.md if it exists. Confirms what was saved. |
-| `"WRAP UP [NAME]"` | User (when testing is done and you're satisfied) | Marks feature DONE: fills Files Modified fully with descriptions, writes Summary and Decisions Made, updates project's `ACTIVE.md` to "none" |
-| `/gather-context` | User (before starting any feature or project) | Deep questioning mode — Claude extracts full real-world understanding of what is being built and why, confirms understanding with the user, saves context to the feature file and optionally to About.md |
-| `/analyze` | User (after /context or when starting implementation) | High-effort codebase scan + requirements review → produces a phased implementation plan with reasoning. Implements phase by phase on confirmation. |
+| `/new-chat [NAME]` | User | Creates `projects/[Project]/chats/[NAME].md` from the template, populates Requirements from your description, updates the project's `ACTIVE.md` |
+| `/save-progress` | User or Claude proactively suggests it | Updates Session Notes and Files Modified (WIP) in the active chat file without marking it done. Also updates About.md if it exists. Confirms what was saved. |
+| `/end-chat [NAME]` | User (when testing is done and you're satisfied) | Marks chat DONE: fills Files Modified fully with descriptions, writes Summary and Decisions Made, updates project's `ACTIVE.md` to "none" |
+| `/gather-context` | User (before starting any chat or project) | Deep questioning mode — Claude extracts full real-world understanding of what is being built and why, confirms understanding with the user, saves context to the chat file and optionally to About.md |
+| `/analyze` | User (after /gather-context or when starting implementation) | High-effort codebase scan + requirements review → produces a phased implementation plan with reasoning. Implements phase by phase on confirmation. |
 
-**Claude will also proactively ask:** *"Should we do a CHECKPOINT now?"* after meaningful blocks of work, until the user confirms they know the keywords well enough — then Claude tapers off.
+**Claude will also proactively ask:** *"Should we do a /save-progress now?"* after meaningful blocks of work, until the user confirms they know the commands well enough — then Claude tapers off.
 
 ---
 
-## C. Feature Lifecycle
+## C. Chat Lifecycle
 
 ```
 PLANNING → IN_PROGRESS → IN_REVIEW → DONE
@@ -72,16 +72,16 @@ PLANNING → IN_PROGRESS → IN_REVIEW → DONE
 | PLANNING | Requirements written, work not yet started |
 | IN_PROGRESS | Actively being built |
 | IN_REVIEW | User is testing — not yet confirmed complete |
-| DONE | WRAP UP received, all sections filled, feature closed |
+| DONE | /end-chat received, all sections filled, chat closed |
 
 ---
 
-## D. Feature File Template
+## D. Chat File Template
 
-When a new feature starts, Claude creates `features/[Name].md` using this exact template:
+When a new chat starts, Claude creates `chats/[Name].md` using this exact template:
 
 ```markdown
-# Feature: [Name]
+# Chat: [Name]
 **Status:** PLANNING
 **Started:** YYYY-MM-DD
 **Completed:** —
@@ -135,8 +135,8 @@ Each project can optionally have an `About.md` file at `projects/[ProjectName]/A
 
 **How it grows:**
 - Created by `/gather-context` — Claude gathers real-world understanding and writes it here
-- Updated by `/checkpoint` — as features progress, new context gets woven in
-- The more features are built with `/gather-context`, the more complete the picture becomes
+- Updated by `/save-progress` — as chats progress, new context gets woven in
+- The more chats are built with `/gather-context`, the more complete the picture becomes
 
 **Critical properties:**
 - `projects/` is in `.gitignore` — **About.md is never committed, never pushed, never visible to anyone but the local user**
@@ -232,7 +232,7 @@ This section contains the exact prompts Claude gives itself at each stage of the
       [N]. Something else — I'll create it"
 4. Wait for the user to pick a number or type a new name.
    - Existing project chosen → set PROJECT = that folder name, continue to step 6.
-   - New name given → create Workflow/projects/[Name]/ with ACTIVE.md ("ACTIVE FEATURE: none") and features/ folder.
+   - New name given → create Workflow/projects/[Name]/ with ACTIVE.md ("ACTIVE FEATURE: none") and chats/ folder.
      Set PROJECT = new name, skip to step 7.
 5. (No projects exist) → ask: "What project are you working on?" Create the folder, set PROJECT.
 6. Read Workflow/projects/[PROJECT]/ACTIVE.md.
@@ -253,7 +253,7 @@ This section contains the exact prompts Claude gives itself at each stage of the
 ```
 1. If About.md exists at projects/[PROJECT]/About.md → read it first, silently.
    Use it to understand the real-world context behind the feature before reading the code.
-2. Read the feature file in full from projects/[PROJECT]/features/[NAME].md.
+2. Read the chat file in full from projects/[PROJECT]/chats/[NAME].md (fall back to features/[NAME].md for existing projects).
 3. Identify which Requirements are pending (not yet implemented).
 4. Read the Files Modified section — open those files directly to re-establish code context.
    Do NOT read files outside of this list unless a new requirement demands it.
@@ -263,16 +263,15 @@ This section contains the exact prompts Claude gives itself at each stage of the
 
 ---
 
-### On new feature start
+### On /new-chat [NAME]
 
 ```
-1. Create projects/[PROJECT]/features/[NAME].md from the template in Section D.
+1. Create projects/[PROJECT]/chats/[NAME].md from the template in Section D.
 2. Populate Requirements from the user's description. Ask clarifying questions
    about scope, edge cases, and acceptance criteria before writing any code.
-3. Update projects/[PROJECT]/ACTIVE.md with the feature name, file path, status IN_PROGRESS, and start date.
-4. Add the feature to the Feature Index table in EdosFramework.md (Section F) under the correct project.
-5. Write the first Session Notes entry: "[date]: Feature created. Requirements confirmed with user."
-6. Confirm: "Feature [NAME] created. Here are the requirements I've recorded: [list]. Shall we start?"
+3. Update projects/[PROJECT]/ACTIVE.md with the chat name, file path, status IN_PROGRESS, and start date.
+4. Write the first Session Notes entry: "[date]: Chat created. Requirements confirmed with user."
+5. Confirm: "Chat [NAME] created. Here are the requirements I've recorded: [list]. Shall we start?"
 ```
 
 ---
@@ -283,8 +282,8 @@ This section contains the exact prompts Claude gives itself at each stage of the
 After each significant unit of work (a new file created, a service method added, an endpoint wired up, a bug fixed):
 - Append a bullet to Session Notes in the active feature file.
 - Update Files Modified with any newly touched files (mark WIP if partially done).
-- Proactively ask: "Should we do a CHECKPOINT now?" once a meaningful block is complete.
-  Continue asking this until the user confirms they have the keywords memorized — then taper off to once per session.
+- Proactively ask: "Should we do a /save-progress now?" once a meaningful block is complete.
+  Continue asking this until the user confirms they know the commands — then taper off to once per session.
 
 Git commit prompting — apply these thresholds, not after every tiny change:
 - 5+ files modified → suggest a commit after the current logical block finishes.
@@ -304,18 +303,18 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 
 ---
 
-### On CHECKPOINT
+### On /save-progress
 
 ```
 1. Update Session Notes: append "[date]: [what was done this session]."
 2. Update Files Modified with every file touched so far. Mark "WIP" for incomplete changes.
 3. Note any decisions made in Decisions Made section.
-4. Confirm to user: "Checkpoint saved. Recorded: [brief bullet summary of what's in the file now]."
+4. Confirm to user: "Progress saved. Recorded: [brief bullet summary of what's in the file now]."
 ```
 
 ---
 
-### On WRAP UP [NAME]
+### On /end-chat [NAME]
 
 ```
 1. Fill Files Modified fully — every file touched, with a one-line description of what specifically changed.
@@ -324,9 +323,8 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 3. Complete Decisions Made with any remaining architectural notes.
 4. Mark Status as DONE. Fill in Completed date.
 5. Update projects/[PROJECT]/ACTIVE.md: set ACTIVE FEATURE to "none".
-6. Update the Feature Index in Section F: set status to DONE and fill Completed date.
-7. Confirm: "Feature [NAME] wrapped up. Summary: [one sentence]. [N] files modified."
-8. Always prompt for git — no exceptions:
+6. Confirm: "Chat [NAME] ended. Summary: [one sentence]. [N] files modified."
+7. Always prompt for git — no exceptions:
    a. Check current branch with `git branch --show-current`.
    b. Check what's uncommitted with `git status --short`.
    c. If there are uncommitted changes:
@@ -338,9 +336,9 @@ Do not repeat the branch question once the user has answered it (yes or no) for 
 
 ---
 
-## H. Feature Tracking
+## H. Chat Tracking
 
-Features are tracked locally — not in this file. Each project has its own `features/` folder at `projects/[ProjectName]/features/`. Every feature is a separate markdown file there. The folder itself is the index — no separate list is maintained in this file.
+Chats are tracked locally — not in this file. Each project has its own `chats/` folder at `projects/[ProjectName]/chats/` (existing projects may still use `features/` — both are supported). Every chat is a separate markdown file there. The folder itself is the index — no separate list is maintained in this file.
 
 This keeps project and feature names off the public repository entirely.
 
@@ -449,10 +447,10 @@ The framework assumes the user may have never used Git, may not know what a Pull
 - The goal is for the user to eventually not need these explanations — they should internalize the workflow over time
 
 **What Claude should do proactively:**
-- After finishing a meaningful chunk of work, ask: *"Should we do a `/checkpoint` now?"*
+- After finishing a meaningful chunk of work, ask: *"Should we do a `/save-progress` now?"*
 - After committing, nudge toward pushing: *"This commit only exists on your machine — want to push it to GitHub?"*
 - After pushing to a feature branch, remind about Pull Requests if one isn't open
-- After a PR is merged, prompt: *"Ready to `/wrap-up` this feature and start the next one?"*
+- After a PR is merged, prompt: *"Ready to `/end-chat` and start the next one?"*
 - Periodically during a session, assess whether there's something worth committing and mention it naturally
 
 **Collaborator context:**
@@ -516,7 +514,7 @@ Push at minimum: at the end of every working session. Ideally: whenever you comm
 /merge                        ← Step 4: merge directly into main/develop
                                  (skips review — only when you own the repo)
 
-/wrap-up [name]               ← Final: close framework record
+/end-chat [name]              ← Final: close framework record
 /send-report                  ← Final: notify collaborators (if BE changes)
 ```
 
@@ -529,7 +527,7 @@ Push at minimum: at the end of every working session. Ideally: whenever you comm
 | `/branch [name]` | Switch to base branch, pull latest, create new branch, explain why |
 | `/commit` | Inspect changes, write meaningful commit message, explain what's being saved |
 | `/push` | Push branch, prompt for PR creation, tag EdinMhc |
-| `/merge` | Merge feature branch directly into main/develop — explains every step, handles conflicts |
+| `/merge` | Merge current branch directly into main/develop — explains every step, handles conflicts |
 | `/git` | Full Git education — branches, commits, pushes, PRs, merges |
 
 ---
