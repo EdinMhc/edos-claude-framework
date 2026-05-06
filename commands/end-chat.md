@@ -37,7 +37,16 @@ ACTIVE FEATURE: none
 
 12. Confirm to the user: "Chat [CHAT_NAME] ended. Summary: [one sentence]. [N] files modified."
 
-13. Always prompt for git — no exceptions:
+13. **Test coverage check** — before prompting for git:
+    a. Check if `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/[PROJECT]/Tests.md` exists.
+    b. If it does NOT exist: skip — this project has no tests set up yet, no reminder needed.
+    c. If it DOES exist: read it. Check if the current chat ([CHAT_NAME]) appears in the per-chat coverage records.
+    d. If the current chat already has test coverage: skip — user already created tests this session.
+    e. If the current chat has NO coverage recorded: say:
+       > "This project has tests set up, but **[CHAT_NAME]** doesn't have test coverage yet. Would you like to run `/add-test [PROJECT]` before closing?"
+    f. Wait for their answer. If yes: run `/add-test [PROJECT]`. If no: continue to git step.
+
+14. Always prompt for git — no exceptions:
     a. Check current branch with `git branch --show-current`.
     b. Check what's uncommitted with `git status --short`.
     c. If there are uncommitted changes, offer to commit and push.
