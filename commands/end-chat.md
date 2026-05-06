@@ -1,0 +1,40 @@
+End and close a completed chat in Edo's Framework. The chat name is: $ARGUMENTS
+
+Follow these steps exactly:
+
+1. Read `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/` to identify the active project. If multiple exist and the project isn't already known, ask the user.
+
+2. Read the project's ACTIVE.md to confirm the active chat matches "$ARGUMENTS". If it does not match, warn the user and stop — do not close the wrong chat.
+
+3. Find the chat file — check chats/ first, fall back to features/:
+   - `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/[PROJECT]/chats/$ARGUMENTS.md`
+   - `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/[PROJECT]/features/$ARGUMENTS.md`
+   Read it in full.
+
+4. Update **Files Modified**: fill in every file that was touched during this chat. For each file, write a specific one-line description of what changed (not just the path — what method was added, what column was added, what endpoint was wired). Replace any "(WIP)" entries with their final descriptions.
+
+5. Write the **Summary** section: 3–5 sentences covering what was built, why it exists, and how it is used.
+
+6. Complete the **Decisions Made** section: add any remaining architectural notes not yet recorded.
+
+7. Fill in the **Test Checklist** section if not already complete: how to verify this feature works end-to-end.
+
+8. Set **Status** to `DONE` and set **Completed** to today's date.
+
+9. Append a final bullet to **Session Notes**: `- [today's date]: Chat ended and marked DONE.`
+
+10. Write the updated chat file back.
+
+11. Update the project's ACTIVE.md to:
+```
+ACTIVE FEATURE: none
+```
+
+12. Confirm to the user: "Chat [$ARGUMENTS] ended. Summary: [one sentence]. [N] files modified."
+
+13. Always prompt for git — no exceptions:
+    a. Check current branch with `git branch --show-current`.
+    b. Check what's uncommitted with `git status --short`.
+    c. If there are uncommitted changes, offer to commit and push.
+    d. If nothing uncommitted: "All changes already committed. Want me to push?"
+    e. Wait for answer — then execute immediately with a suggested commit message covering the full chat.
