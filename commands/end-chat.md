@@ -1,14 +1,19 @@
-End and close a completed chat in Edo's Framework. The chat name is: $ARGUMENTS
+End and close a completed chat in Edo's Framework.
+
+**Parsing $ARGUMENTS:**
+- If $ARGUMENTS contains a space, the first word is the project name and everything after is the chat name. Use these directly — skip step 1.
+- If $ARGUMENTS has no space, treat it as the chat name only and follow step 1 to determine the project.
 
 Follow these steps exactly:
 
-1. Read `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/` to identify the active project. If multiple exist and the project isn't already known, ask the user.
+1. **Determine project** (skip if project was parsed from $ARGUMENTS above):
+   Read `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/` to identify the active project. If multiple exist and the project isn't already known, ask the user.
 
-2. Read the project's ACTIVE.md to confirm the active chat matches "$ARGUMENTS". If it does not match, warn the user and stop — do not close the wrong chat.
+2. Read the project's ACTIVE.md to confirm the active chat matches the chat name. If it does not match, warn the user and stop — do not close the wrong chat.
 
 3. Find the chat file — check chats/ first, fall back to features/:
-   - `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/[PROJECT]/chats/$ARGUMENTS.md`
-   - `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/[PROJECT]/features/$ARGUMENTS.md`
+   - `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/[PROJECT]/chats/[CHAT_NAME].md`
+   - `C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/[PROJECT]/features/[CHAT_NAME].md`
    Read it in full.
 
 4. Update **Files Modified**: fill in every file that was touched during this chat. For each file, write a specific one-line description of what changed (not just the path — what method was added, what column was added, what endpoint was wired). Replace any "(WIP)" entries with their final descriptions.
@@ -30,7 +35,7 @@ Follow these steps exactly:
 ACTIVE FEATURE: none
 ```
 
-12. Confirm to the user: "Chat [$ARGUMENTS] ended. Summary: [one sentence]. [N] files modified."
+12. Confirm to the user: "Chat [CHAT_NAME] ended. Summary: [one sentence]. [N] files modified."
 
 13. Always prompt for git — no exceptions:
     a. Check current branch with `git branch --show-current`.

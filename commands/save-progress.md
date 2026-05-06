@@ -1,14 +1,18 @@
 Save progress for the currently active chat in Edo's Framework.
 
+**Parsing $ARGUMENTS:**
+- If $ARGUMENTS is provided (not empty), use it as PROJECT_NAME and skip Step 1's project scan/question.
+- If $ARGUMENTS is empty, follow Step 1 normally.
+
 Follow these steps exactly.
 
 ---
 
 ## Step 1 — Establish project and active chat
 
-Check if a project and active chat are already known in this conversation. If yes, skip to Step 2.
+If PROJECT_NAME was set from $ARGUMENTS, skip to reading ACTIVE.md.
 
-If not, scan for available projects:
+Otherwise, scan for available projects:
 ```bash
 ls "C:/Users/Ednmh/OneDrive/Desktop/PROJECTS/edos-claude-framework/projects/" 2>&1
 ```
@@ -71,7 +75,7 @@ If the About file does not exist, skip this step silently.
 ## Step 4 — Confirm to the user
 
 Tell the user:
-> "Progress saved for **[CHAT_NAME]**.
+> "Progress saved for **[CHAT_NAME]** in **[PROJECT_NAME]**.
 > - Session notes updated: [one sentence on what was recorded]
 > - Files modified: [count] tracked
 > [If About file was updated]: About file updated with latest context."
